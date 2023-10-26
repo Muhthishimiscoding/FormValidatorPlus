@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sample Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+        }
+        .invalid-feedback{
+            padding: 10px;
+            color: red;
+        }
+        .is-invalid{
+            border: 2px solid rgb(245, 12, 12)!important;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input[type="file"],
+        textarea {
+            width: 90%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+
+        input[type="file"] {
+            margin-top: 5px;
+        }
+
+        .submit-button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .submit-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sample Form</h1>
+        <form action="#" method="post" enctype="multipart/form-data" class="auth-form">
+            <div class="form-group">
+                <label for="singleFileInput">Single File Upload:</label>
+                <input type="file" id="singleFileInput" name="singleFile">
+            </div>
+            <div class="form-group">
+                <label for="singleFileInput">Number:</label>
+                <input type="text" name="numb">
+            </div>
+            <!-- <div class="form-group">
+                <label for="multipleFileInput">Multiple File Upload:</label>
+                <input type="file" id="multipleFileInput" name="multipleFiles[]" multiple>
+            </div> -->
+            <button type="submit" class="submit-button">Submit</button>
+
+            <div class="form-group">
+                <label for="textareaInput">Password:</label>
+                <input id="textareaInput" name="password">
+            </div>
+            <div class="form-group">
+                <label for="textareaInput">Confirm Password:</label>
+                <input id="textareaInput" name="conpassword" >
+            </div>
+            <div class="form-group">
+                <label for="textareaInput">Text Area:</label>
+                <textarea id="textareaInput" name="textarea" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="simpleInput">myinput:</label>
+                <textarea id="simpleInput" name="myinput"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="simpleInput">New input</label>
+                <input id="simpleInput" name="newInput"></input>
+            </div>
+            <div class="form-group">
+                <label>In list</label>
+                <input type="text" name="inList">
+            </div>
+            <div class="form-group">
+                <label for="simpleInput">dateTime:</label>
+                <input type="datetime-local" name="dateTime" id="date">
+            </div>
+            <div class="form-group">
+                <label for="simpleInput">Please agree with our terms and agreements</label>
+                <input type="checkbox" name="checkbox" id="">
+            </div>
+            <div class="form-group">
+                <label>Please enter a valid url</label>
+                <input type="text" name="url" id="">
+            </div>
+            <div class="form-group">
+                <label>Please enter a valid zipCode</label>
+                <input type="text" name="zipCode" id="">
+            </div>
+            <div class="form-group">
+                <label>Please enter a valid json</label>
+                <textarea type="text" name="json" id=""></textarea>
+
+                
+            </div>
+            <div class="form-group">
+            <select name="n" id="">
+                <option selected value=""></option>
+                <option>Ms</option>
+                <option>bs</option>
+            </select>
+            </div>
+            <button type="submit" class="submit-button">Submit</button>
+        </form>
+    </div>
+    <script src="/auth/jquery-3.5.1.min.js"></script>
+    <script src="/auth/validate.js"></script>
+    <script src="/auth/form.js"></script>
+    <script>
+        let form = document.querySelector('.auth-form');
+        let formdata = new FormData();
+        veliadtor.setMaxdate('#date', 18);
+        veliadtor.setPhone('[name="numb"]', true);
+        formdata.append('myformdatakey','myformdatavalue');
+        formdata.append('myformdatakey','This is a dublicate of all myformdatakey');
+        // let rules = {
+        //             myinput : 'required|min:6|max:12|email',
+        //             textarea : [ {[Model.RULE_MIN]: 19}],
+        //             checkbox : 'accept',
+        //             dateTime : [ {tillDate : -19}],
+        //             singleFile :['required',
+        //                     {fileSize: (1024*1024)*3},//5mb (1024*1024)*5
+        //                     {
+        //                         dimension: 
+        //                     {smallest : [735, 1102], highest : [1000, 1500] }
+        //                     // {square : 500}
+        //                     // {
+        //                     //     ratio : "1:1", 
+        //                     //     difference: 5e-324
+        //                     // }
+        //                     }
+        //             ],
+        //             newInput : 'required|min:6',
+        //             numb : [
+        //                 {
+        //                     range : [4,9]
+        //                 },
+        //                 {numb_space : true}
+        //             ],
+        //             password : 'password',
+        //             conpassword : 'same:password'
+        //             // ['dimension', {equal : [300, 500]}]
+        //         };
+         
+                let validate =  {
+                rules : {
+                    url : 'url:1',
+                    myinput : 'required|min:6|max:12|email',
+                    textarea : [ {[Model.RULE_MIN]: 19}],
+                    checkbox : 'accept',
+                    dateTime : ['date', {tillDate : -19}],
+                    singleFile :['required',
+                            {fileSize: (1024*1024)*3},//5mb (1024*1024)*5
+                            {
+                                dimension: 
+                            {smallest : [735, 1102], highest : [1000, 1500] }
+                            }
+                    ],
+                    zipCode : 'zipCode',
+                    newInput : 'required|min:6',
+                    numb : [
+                        {
+                            range : [4,9]
+                        },
+                        {numb_space : true}
+                    ],
+                    password : 'password',
+                    conpassword : 'same:password',
+                    inList : [{
+                        inList : ['abc', 'cdf', 'ghj']
+                    }],
+                    n : ['required',{
+                        inList : ['abc', 'cdf', 'ghj']
+                    }] ,
+                    json : 'json:1'
+                    // ['dimension', {equal : [300, 500]}]
+                },
+                
+                errorMsgs : {
+                    myinput: {
+                    required: "This is a custom message for required field",
+
+                    },
+                    singleFile : {
+                        fileSize : "The file size exceeds max file size which is 3mb."
+                    },
+                    url : {
+                        url_ftp : 'The entered url is not a valid url'
+                    },
+                    
+                },
+                callback : function(errors){
+                    console.log(errors);
+                }
+             }
+            //  pakistan : ['a', 'b', 'c'];
+            //  china : ['d', 'e', 'f'];
+        let obj = {
+            form : form,
+            validate ,
+            overwrite: "overwritenone",
+            overwrite: "overwriteFiles",
+            resetKeys : ['singleFile', 'multipleFiles[]'],
+            ajaxSettings: {
+                url:'http://localhost/layout/index.php',
+                dataType: "json",
+                success: (data) => {
+                    console.log(data);
+                },
+            },
+        };
+         form.onsubmit = async e => {
+            e.preventDefault();
+            let filesObj = await SubmitForm.selectFiles(form);
+            obj.inputs = [filesObj, {"myinput": "o@gmail.com"}, formdata];
+            console.log(filesObj);
+            SubmitForm.justSubmit(obj);
+
+         }
+         console.log(obj);
+     
+                Model.liveVerify({...validate, callback : null});
+                // callback : function(key, errors, rules){
+                //     console.log("Inside personal callback live verify", key, errors, rules);
+                // }
+        // SubmitForm.quickSumbit({
+        //     form : '.auth-form',
+        //     // selectFiles : true,
+        //     ajaxSettings: {
+        //         url:'http://localhost/layout/index.php',
+        //         dataType: "JSON",
+        //         success: (data) => {
+        //             console.log(data);
+        //         },
+        //         contentType: 'application/json',
+        //                         // processData: false,
+        //     },
+        // });
+    </script>
+</body>
+</html>
