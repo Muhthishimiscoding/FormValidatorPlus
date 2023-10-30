@@ -83,6 +83,11 @@
             <button type="submit" class="submit-button">Submit</button>
 
             <div class="form-group">
+                <label for="Ean">Upc:</label>
+                <input id="Ean" name="upc">
+            </div>
+
+            <div class="form-group">
                 <label for="textareaInput">Password:</label>
                 <input id="textareaInput" name="password">
             </div>
@@ -113,10 +118,15 @@
             <div class="form-group">
                 <label for="simpleInput">Please agree with our terms and agreements</label>
                 <input type="checkbox" name="checkbox" id="">
+                <!-- <input type="checkbox" name="checkbox" id=""> -->
             </div>
             <div class="form-group">
                 <label>Please enter a valid url</label>
                 <input type="text" name="url" id="">
+            </div>
+            <div class="form-group">
+                <label>Any of rules</label>
+                <input type="text" name="anInput" id="">
             </div>
             <div class="form-group">
                 <label>Please enter a valid zipCode</label>
@@ -138,14 +148,16 @@
             <button type="submit" class="submit-button">Submit</button>
         </form>
     </div>
-    <script src="/auth/jquery-3.5.1.min.js"></script>
-    <script src="/auth/validate.js"></script>
-    <script src="/auth/form.js"></script>
+    <script src="/auth/jquery.min.js"></script>
+    <!-- <script src="formValidator.min.js"></script> -->
+    <script src="Group/formValidator.js"></script>
+    <!-- <script src="/auth/validator.js"></script> -->
+    <!-- <script src="/auth/form.js"></script> -->
     <script>
         let form = document.querySelector('.auth-form');
         let formdata = new FormData();
-        veliadtor.setMaxdate('#date', 18);
-        veliadtor.setPhone('[name="numb"]', true);
+        Validator.setMaxdate('#date', 18);
+        Validator.setPhone('[name="numb"]', true);
         formdata.append('myformdatakey','myformdatavalue');
         formdata.append('myformdatakey','This is a dublicate of all myformdatakey');
         // let rules = {
@@ -181,7 +193,7 @@
                 rules : {
                     url : 'url:1',
                     myinput : 'required|min:6|max:12|email',
-                    textarea : [ {[Model.RULE_MIN]: 19}],
+                    textarea : [ {min: 19}],
                     checkbox : 'accept',
                     dateTime : ['date', {tillDate : -19}],
                     singleFile :['required',
@@ -193,21 +205,38 @@
                     ],
                     zipCode : 'zipCode',
                     newInput : 'required|min:6',
+                   anInput : [
+                    'required',
+                    {
+                    any_of_rules : [
+                            "zipCode", 
+                        "min:9"
+                    ]
+                   }],
                     numb : [
                         {
                             range : [4,9]
                         },
                         {numb_space : true}
                     ],
-                    password : 'password',
-                    conpassword : 'same:password',
+                    password :
+                        {
+                                any_of : {
+                                    password : 'required|password',
+                                    conpassword : 'required|same:password',
+                             }
+                        },
+                
+                    // password : 'password',
+                    // conpassword : 'same:password',
                     inList : [{
                         inList : ['abc', 'cdf', 'ghj']
                     }],
                     n : ['required',{
                         inList : ['abc', 'cdf', 'ghj']
                     }] ,
-                    json : 'json:1'
+                    json : 'json:1',
+                    upc : 'required|dateTime'
                     // ['dimension', {equal : [300, 500]}]
                 },
                 
@@ -222,11 +251,12 @@
                     url : {
                         url_ftp : 'The entered url is not a valid url'
                     },
+                    anInput_any_of_rules :  "This field either needs to be a zip code or contains 9 characters."
                     
                 },
-                callback : function(errors){
-                    console.log(errors);
-                }
+                // callback : function(errors){
+                //     console.log(errors);
+                // }
              }
             //  pakistan : ['a', 'b', 'c'];
             //  china : ['d', 'e', 'f'];
@@ -252,9 +282,9 @@
             SubmitForm.justSubmit(obj);
 
          }
-         console.log(obj);
+        //  console.log(obj);
      
-                Model.liveVerify({...validate, callback : null});
+                Validator.liveVerify({...validate, callback : null});
                 // callback : function(key, errors, rules){
                 //     console.log("Inside personal callback live verify", key, errors, rules);
                 // }

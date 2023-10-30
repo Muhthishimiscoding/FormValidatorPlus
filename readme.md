@@ -9,7 +9,7 @@ FormValidator is your all-in-one solution for simplified form management. Whethe
 
 #### Effortless Form Validation
 
-FormValidator makes setting up and managing form validation rules a breeze. It offers a comprehensive set of predefined rules, including basic checks like required fields and valid email addresses, as well as advanced criteria like upc, ean validation. Configuring validation rules is intuitive, eliminating the need for complex regular expressions and JavaScript functions.
+FormValidator makes setting up and managing form validation rules a breeze. It offers a comprehensive set of predefined rules, including basic checks like required fields and valid email addresses, as well as advanced criteria like upc-a, ean-13 validation. Configuring validation rules is intuitive, eliminating the need for complex regular expressions and JavaScript functions.
 
 #### Seamless Integration
 
@@ -290,7 +290,7 @@ This are instance method useful to know if you are defining your custom rules.
 - [dateTime](#dateTime)
 - [dimension](#dimension)
 - [detectMultipleSpaces](#detectmultiplespaces)
-- [ean](#ean)
+- [ean13](#ean13)
 - [email](#email)
 - [fileExt](#fileext)
 - [fileSize](#filesize)
@@ -324,7 +324,7 @@ This are instance method useful to know if you are defining your custom rules.
 - [space](#space)
 - [tillDate](#tillDate)
 - [url](#url)
-- [upc](#upc)
+- [upca](#upca)
 - [upperCase](#upperCase)
 - [zipCode](#zipCode)
 
@@ -496,7 +496,7 @@ required',
 - This would detect multiple spaces inside an input.
 
 ##### ean
-- Validates the ean number (European Article Number) .
+- Validates the ean-13 number (European Article Number) .
 
 ##### email
 
@@ -760,8 +760,8 @@ let rules = {
 
 - Validates that a field contains only uppercase letters.
 
-##### upc
-- The field under validation needs to be a valid upc (Universal Product Code) format.
+##### upca
+- The field under validation needs to be a valid upc-a (Universal Product Code) format.
 
 ##### url 
 - The field under validation must be a valid http url. If you want to allow ftp urls to you can pass 1 as an argument to this function and then if you also want to give the custom error msg for this field you need to use the url_ftp key to send it's error message.
