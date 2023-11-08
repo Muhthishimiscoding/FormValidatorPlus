@@ -1,18 +1,108 @@
+/**
+ * @name Validator
+ * @description It is a vanilla javascript Validator of FormValidator.
+ * It doesn't submit forms, it validates form, for more details visit.
+ * If you just want to validate form and want to submit it with your own
+ * code You can use it, otherwise FormValidator recommended 
+ * https://github.com/Muhthishimiscoding/FormValidatorPlus.
+ * @version 1.0.0
+ * @author Muhthishim Malik 
+ * @link https://github.com/Muhthishimiscoding
+ * @license MIT
+ */
 
-var [Validator, SubmitForm] = (function () {
+var Validator = (function () {
     'use strict';
-    class Validator {
+    return class Validator{
+        // Works great without jQuery
+        /**
+         * @param {HTMLFormElement | string} selector Resolve a selector or throws error
+         * @param {{ new (): HTMLFormElement; prototype: HTMLFormElement}}[instance=HTMLFormElement] Type of element you want to select like HTMLElement, 
+         * HTMLInputElement etc if your element doesn't match with this slector
+         * @throws {TypeError}
+         */
+        static selectElem(selector, instance = HTMLFormElement) {
+            let elem = null;
+            if (selector instanceof instance) elem = selector;
+            else if (typeof selector === 'string') elem = document.querySelector(selector);
+
+            if (!(elem instanceof instance)) throw new TypeError(`No element in dom exists with this ${selector} selector.`);
+            return elem;
+        }
+                //----------------------Default Data Sets------------------------\\
+        // Error Message defaults objects
+        static errorMessages = {
+            alpha: "This field needs to contain only alphabatic characters i.e A to z.",
+            alpha_s: "This field can only have only alphabatic characters i.e A to z and space",
+            alphaNumeric: "This field can only contain alphanumeric characters.",
+            alphaNumeric_s: "Thie fields can only contain alphanumeric characters and space.",
+            date: 'Please enter a valid date in the format YYYY-MM-DD.',
+            dateAll: 'Please enter a valid date',
+            dateTime: 'Please enter a valid date and time in the format YYYY-MM-DD HH:MM:SS.',
+            required: 'This field is required.',
+            email: 'Please provide a valid email address.',
+            // [Validator.RULE_MATCH]: 'This should match with the {match}.',
+            min: 'The field should contain a minimum of {min} characters.',
+            max: 'The field should contain a maximum of {max} characters.',
+            // [Validator.RULE_SPECIAL]: 'This field must contain a special character such as $, #, %, or @.',
+            noSpecial: 'This field should not contain any special characters like $, #, &, @, or >.',
+            space: 'This field must contain at least one space.',
+            noSpace: 'This field should not contain any spaces.',
+            lowerCase: 'This field should contain lowercase letters.',
+            upperCase: 'This field should contain uppercase letters.',
+            numb: 'This field should contain only digits.',
+            maxnumb: 'This field should not exceed {max} digits.',
+            minnumb: 'This field should contain at least {min} digits.',
+            makeInvalidEmpty : "Please make this field empty.",
+            tillDate: 'The date of this field should be selected before {tillDate}.',
+            shouldOld: 'Age Requirement: You must be at least {shouldOld} years old to access this feature/content.',
+            fileSize: 'The maximum allowed file size is {fileSize} and your file size is {fileSize2}.',
+            fileType: 'The allowed file types are {fileType}',
+            image: 'The uploaded file is not a valid image. Allowed image types are {image}.',
+            fileExt: 'The file is not of valid type allowed file types are {fileExt}.',
+            dimension_equal: 'The uploaded image has a width of {givenWidth}px and height of {givenHeight}px, while the required dimensions are {expectedWidth}x{expectedHeight} pixels.',
+            dimension_smallest: 'The smallest accepted width and height are {expectedWidth}x{expectedHeight} pixels, but your image is smaller than that, {givenWidth}x{givenHeight}.',
+            dimension_highest: 'The largest accepted width and height are {expectedWidth}x{expectedHeight} pixels, but your image is larger than that, {givenWidth}x{givenHeight}.',
+            dimension_width: 'The expected width for this image is {width}px.',
+            dimension_height: 'The expected height for this image is {height}px.',
+            dimension_square: 'This image needs to be a square, meaning it should have the same height and width, like 500x500 pixels.',
+            dimension_square_size: 'This image needs to be square with a width and height of {expectedWidth}x{expectedHeight} pixels.',
+            dimension_aspectRatio: 'The image must have an aspect ratio of {aspectRatio}.',
+            detectMultipleSpaces: 'This field has multiple consecutive spaces.',
+            accept: 'Please check this checkbox.',
+            range: 'The entered number must be between {num1} to {num2}.',
+            numb: 'This field needs to be a valid number without any space',
+            numb_space: 'This field needs to be a valid number.',
+            numb_space_double: 'This field contains more spaces then it should.',
+            password: 'This field needs to contain small case, uppercase, special characters i.e $,#,% etc and digits characters and has a length of atleast {password} characters.',
+            hasLowerCase: 'The field needs to have a lower case character.',
+            hasUpperCase: 'The field needs to have a upper case character.',
+            hasSpecial: 'The field needs to have a special character like $, #, @, & etc.',
+            hasDigit: 'The field needs to have a numeric digit [0-9].',
+            same: 'This field must match with the {same}.',
+            inList: 'The field must be of any of these {inList}.',
+            url: "Please enter a valid HTTP or HTTPS URL.",
+            url_ftp: "Please enter a valid HTTP or HTTPS or FTP URL.",
+            zipCode: "Please enter a valid ZIP/Postal code.",
+            json: "The provided JSON structure is not valid.",
+            ipv4: "Please enter a valid IPv4 address.",
+            ipv6: "Please enter a valid IPv6 address.",
+            isbn: "Please enter a valid ISBN (ISBN-10 or ISBN-13).",
+            upca: "Please enter a valid UPC-A (Universal Product Code).",
+            ean13: "Please enter a valid EAN-13 (European Article Number)."
+        };
         /**
          * Negative checks alpha numeric
          * characters including space
          * and period (.).
          */
         static REG_SPECIAL = /[^\p{L}0-9\s.]/u;
+        static defaultMsg = "An unknown error occured";
         static imgMimeTypes = [
             'image/jpeg',
             'image/jpg',
             'image/png',
-            // 'image/gif',
+            'image/gif',
             'image/bmp',
             'image/webp'
         ];
@@ -49,7 +139,8 @@ var [Validator, SubmitForm] = (function () {
          *                      ]
          *                  ]
          * }
-         * @param {object} errorMessages There are two ways to pass your error messages 
+         * @param {object} errorMessages There are two ways to pass 
+         * your error messages 
          * as one is by creating sub-object recommended 
          * when you have multipke rules for a single 
          * input and the second one is by using concatenated 
@@ -67,12 +158,14 @@ var [Validator, SubmitForm] = (function () {
          *         min : "message"
          *      }
          * }
-         * Example of second way It is recommended for when input has only one rule but if you 
+         * Example of second way It is recommended for when input has 
+         * only one rule but if you 
          * want you can use it with as many rules as you want.
          * 
          * errorMessages : {
          *      username_min : "message"
-         *      username_max : "Here max is rule name underscore is just for seperation and you
+         *      username_max : "Here max is rule name underscore is 
+         * just for seperation and you
          * can have as many underscore as you want in name attribute.",
          *      otherinput_min : "message"
          * }
@@ -155,24 +248,24 @@ var [Validator, SubmitForm] = (function () {
              * Conditional errors
              */
             this.conerrors = {};
-            this.conShowErrors = {};
-        }
+      }
         /**
          * Register a New Conditional Errors object with the given inputName and ruleName
          * @param {string} inputName 
          * @param {string} ruleName 
          * You can access your conditional error object like this 
-         * @code this.conerrors[inputName][ruleName] 
+         * @code this.conerrors[inputName][ruleName].get(key)
          * it is an object 
          * which contain condional errors for inputs
          */
         regConErrors(inputName, ruleName) {
-            if (typeof this.conerrors?.[inputName]?.[ruleName] == 'undefined') {
-                if (typeof this.conerrors?.[inputName] == 'undefined') {
+            if (this.conerrors?.[inputName]?.[ruleName] == undefined) {
+                if (this.conerrors?.[inputName] == undefined) {
                     this.conerrors[inputName] = {};
                 }
-                this.conerrors[inputName][ruleName] = {};
+                this.conerrors[inputName][ruleName] = new Map();
             }
+            return {inp : inputName, ruleName};
         }
         /**
          * Sets the static property of 
@@ -191,7 +284,7 @@ var [Validator, SubmitForm] = (function () {
         }
         /**
          * @param {object} customErrorMessages 
-         * @returns 
+         * @returns {Validator}
          */
         setErrorMessages(customErrorMessages) {
             if (this.customMessages) {
@@ -208,9 +301,6 @@ var [Validator, SubmitForm] = (function () {
             return 'required';
         }
 
-        static get RULE_EMAIL() {
-            return 'email';
-        }
         //-------------------------------DATE RESOLVERS------------------------------\\
         /**
          * Gives a utc date for a normal date
@@ -253,9 +343,9 @@ var [Validator, SubmitForm] = (function () {
          * @param {null|Date|Number} [toDate=null] In number case it should be years count 
          */
         static setMaxdate(selector, toDate = null) {
-            let input = SubmitForm.selectElem(selector, HTMLInputElement, true);
+            let input = Validator.selectElem(selector, HTMLInputElement);
             let max = Validator.getDate(toDate);
-            input[0].max = max.toISOString().split('T')[0];
+            input.max = max.toISOString().split('T')[0];
         }
         /**
          * Set the field a valid number 
@@ -264,12 +354,12 @@ var [Validator, SubmitForm] = (function () {
          * as input
          */
         static setNum(selector, setMax = false) {
-            let input = SubmitForm.selectElem(selector, HTMLElement, true);
-            input.on('input', function () {
-                let s = input.val();
-                input.val(s.replace(/\D/g, ''))
+            let input = Validator.selectElem(selector, HTMLElement);
+            input.addEventListener('input', function () {
+                let s = input.value;
+                input.value = s.replace(/\D/g, '')
                 if (setMax && s > setMax) {
-                    input.val(s.slice(0, s.length - 1));
+                    input.value = s.slice(0, s.length - 1);
                 }
             });
         }
@@ -283,15 +373,15 @@ var [Validator, SubmitForm] = (function () {
          * @param {number[]} putSpaces - Array of positions where spaces should be added.
         */
         static setPhone(selector, allowCode = false, numCount = 10, putSpaces = [2, 5]) {
-            let input = SubmitForm.selectElem(selector, HTMLElement, true);
-            input.on('input', function (e) {
+            let input = Validator.selectElem(selector, HTMLElement);
+            input.addEventListener('input', function (e) {
                 let val = '', newVal = '', changePlus = false;
                 if (!allowCode)
                     // \D would match with any non-digit characters
-                    val = input.val().replace(/\D/g, '');
+                    val = input.value.replace(/\D/g, '');
                 else {
                     numCount = (numCount === 10) ? 13 : numCount;
-                    val = input.val().replaceAll(/[^0-9+]/g, '');
+                    val = input.value.replaceAll(/[^0-9+]/g, '');
                     if (!val.includes('+')) {
                         newVal = '+';
                         changePlus = true;
@@ -307,7 +397,7 @@ var [Validator, SubmitForm] = (function () {
                 }
                 //removes the extra spaces from the end of inputs
                 if (!changePlus && newVal === "+") newVal = '';
-                input.val(newVal.trimEnd());
+                input.value = newVal.trimEnd();
 
             });
         }
@@ -364,134 +454,77 @@ var [Validator, SubmitForm] = (function () {
         static liveVerify(obj) {
             // If object doesn't contain rule property it means the whole object is rule
             let rules = obj?.rules || obj;
-            // if (!obj.hasOwnProperty('rules')) {
-            //     rules = obj;
-            // } else {
-            //     rules = obj.rules;
-            // }
+           
             let verify = new Validator(rules, (obj?.errorMsgs || {})),
             callback = obj?.callback || verify.showErrors.bind(verify),
-            condionalCallback = obj?.condionalCallback || callback,
             conThrottle = obj?.conThrottle || 500,
             throttle = obj?.throttle || 300;
-            // if (!callback) {
-            //     callback = verify.showErrors.bind(verify);
-            // }
+ 
             if (typeof callback !== 'function') throw new TypeError("callback paratemer needs to be a function");
-
-            // window.errors = verify.errors;
+ 
+            let debouncedEvent = verify.debounce(async function (input, rule, key, callback) {
+                // Debouncer would make this available here
+                let i = await this.runRules(this.getDataFromInp(input), key, rule);
+                if (i === 2) {
+                    /**
+                     * Verifier did not found any error 
+                     * inside this field.
+                    */
+                    if (this.errors.hasOwnProperty(key)) {
+                        delete this.errors[key];
+                    }
+                }
+                callback(key, this.rules, this.errors,  this);
+            }, throttle),
+            blurEvent = verify.debounce(function(input, key) {
+                /**
+                  * On file case making val null because
+                  * required function would select file by 
+                  * itself.
+                  */
+                let val = (input.type === 'file') ? null : input.value;
+                if (this.required(val, null, key) == 0) {
+                    this.putError(key, 'required');
+                    callback(key, this.rules, this.errors, this);
+                };
+            },throttle);
 
             for (const key in verify.rules) {
 
                 if (verify.rules.hasOwnProperty(key)) {
-                    let input = $(`[name="${key}"]`),
+                    let input = document.querySelector(`[name="${key}"]`),
                         rule = verify.resolveRule(verify.rules[key]),
                         bool = rule.includes('required'),
-                        // throttledCallback = verify.throttle(verify.runConrules, delay, options)
-                        i = verify.runConrules(key, rule, conThrottle);
+                        i = verify.runConrules(key, rule, conThrottle, callback);
                         if(i > -1){
                             // Means an input can't have more than one conditional rules
                             continue;
                         }
-                    //     i = rule.findIndex(v => {
-                    //         if (typeof v === 'object') {
-                    //             if (v.hasOwnProperty('any_of')) {
-                    //                 return true;
-                    //             }
-                    //         }
-                    //         return false;
-                    //     })
-                    // console.log(i);
-                    // if (i > -1) {
-                    //     verify.regConErrors()
-                    //     verify.conerrors['any_of'] = {};
-                    //     for (const skey in rule[i]['any_of']) {
-                    //         window.r = rule[i];
-                    //         if (rule[i]['any_of'].hasOwnProperty(skey)) {
-                    //             let e = $(`[name="${skey}"]`);
-                    //             console.log(e, skey, rule[i]['any_of']);
-                    //             e.on('input', async function () {
-                    //                 for (const nK in rule[i]['any_of']) {
-                    //                     if (rule[i]['any_of'].hasOwnProperty(nK)) {
-                    //                         let s = await verify.verify(verify.getDataFromInput(nK, true), nK, verify.resolveRule(rule[i]['any_of'][nK]), 'any_of');
-                    //                         if (s === 2) {
-                    //                             /**
-                    //                              * Verifier did not found any error 
-                    //                              * inside this field.
-                    //                             */
-                    //                             console.log(nK, s, "clearing error");
-                    //                             verify.conerrors['any_of'] = {};
-                    //                             for (const k in rule[i]['any_of']) {
-                    //                                 console.log("Inside clearing error", k);
-                    //                                 if (verify.errors.hasOwnProperty(k)) {
-                    //                                     delete verify.errors[k];
-                    //                                 }
-
-                    //                             }
-                    //                             break;
-                    //                         }
-                    //                     }
-                    //                 }
-                    //                 if (Object.keys(verify.conerrors['any_of']).length > 0) {
-                    //                     console.log("when error is found.", skey, verify.conerrors['any_of'][skey]);
-                    //                     verify.errors[skey] = verify.conerrors['any_of'][skey];
-                    //                 }
-                    //                 // callback(null, verify.errors, verify.rules, verify);    
-                    //                 verify.showConErr(rule[i]['any_of']);
-                    //             });
-                    //         }
-                    //     }
-                    //     continue;
-                    // }
-
 
                     if (bool) {
-                        input.on('blur focus', function () {
-                            /**
-                              * On file case making val null because
-                              * required function would select file by 
-                              * itself.
-                              */
-                            let val = (input[0].type === 'file') ? null : input.val();
-                            if (verify.required(val, null, key) == 0) {
-                                verify.putError(key, 'required');
-                                callback(key, verify.rules, verify.errors, this);
-                            };
-                        });
+                        ['blur','focus'].forEach(e => {
+                            input.addEventListener(e, ()=> {
+                                blurEvent(input, key);
+                            });
+                        })
                     }
-                    input.on('input', verify.throttle(async function () {
-                        // verify.getDataFromInput(key)
-                        let i = await verify.verify(verify.getDataFromInp(input[0]), key, rule);
-                        if (i === 2) {
-                            /**
-                             * Verifier did not found any error 
-                             * inside this field.
-                            */
-                            if (verify.errors.hasOwnProperty(key)) {
-                                delete verify.errors[key];
-                            }
-                        }
-                        callback(key, verify.rules, verify.errors,  verify);
-                    }, throttle));
+                    input.addEventListener('input', () => debouncedEvent(input, rule, key, callback));
                 }
             }
         }
         /**
-         * Get the conditional rule and it's index inside an arrau
+         * Get the conditional rule and it's index inside in an array
          * @param {Array} rule 
-         * @returns 
+         * @returns {Array} Contains either one or 2 elements
          */
         getConrule(rule){
-            let allConRules = ['any_of'];
+            let allConRules = ['any_of', 'only_any_of'];
             // Checking the rule array for any conditional rules
             for (let i = 0; i < rule.length; i++) {
-                const e = rule[i];
-                if (typeof e === 'object') {
-                    console.log('object', e);
+                if (typeof rule[i] === 'object') {
                     for (const v of allConRules) {
-                        console.log('value', v);
               
-                        if (e.hasOwnProperty(v)) {
+                        if (rule[i].hasOwnProperty(v)) {
                             return [i, v];
                         }
                     }
@@ -505,87 +538,110 @@ var [Validator, SubmitForm] = (function () {
         * @param {Number} delay 
         * @param {object} options
         * @param {...} args callBack parameters
-        * @returns {Function} Returns an async function
+        * @returns {Function} Returns an async function which accepts args
         */
-        throttle(callBack, delay, ...args){
-            let lastTimeExe = 0, now;
-            return async function(){
-                console.log("Throttle is invoked");
+        debounce(callBack, delay){
+            let lastTimeExe = Date.now(), now, context = this, timeOut, timeSinceLastExe;
+            return async function(...args){
                 now = Date.now();
-                // timeSinceLastExe = now - lastTimeExe;
-                // clearTimeout(timeOut);
-                // timeOut = setTimeout(async ()=> {
-                //     lastTimeExe = now;
-                //     console.log("Set time is invoked", delay, now, timeSinceLastExe, lastTimeExe, timeOut)
-                //    await callBack.apply(this, args)
-                // }, delay);
-                if(now - lastTimeExe >= delay){
-                    console.log("Throttle run the function");
-                    lastTimeExe = now;
-                    await callBack.apply(context, args);
-                }
+                timeSinceLastExe = now - lastTimeExe;
+                clearTimeout(timeOut);
+                timeOut = setTimeout(async ()=> {
+                    await callBack.apply(context, args)
+                    lastTimeExe = Date.now();
+                }, delay-timeSinceLastExe);
             };
         }
         /**
-         * 
-         * @param {string} key 
-         * @param {Array} rule 
-         * @param {Number} throttlingTime 
+         * Verifies rules inside conditional rule
+         * @param {string} skey Sub Input name attribute from the loop which you run 
+         * on input event
+         * @param {object} resolvedRules An object which contains resolved rules
+         * @param {string} key The main Input name attr where conditional rule is given
+         * @param {string} r Name of the rule like 'any_of' or 'only_any_of'
+         * @param {object} addError Which you get by regisitering conditional error
+         * for an input
+         * @param {Function} callback A function which would be used to show errors
+         * @param {boolean|undefined} makeInvalidEmpty A special parameter for 
+         * 'only_any_of' rule
          */
-        runConrules(key, rule, throttlingTime) {
-            let [i, r] = this.getConrule(rule);
+        async #verifyConRule(skey, resolvedRules, key, r, addError, callback, makeInvalidEmpty){
+                    let s = [],j;
+                    //Running the loop on every input to make sure that input is valid or not 
+                    for (const nK in resolvedRules) {
+                        if (resolvedRules.hasOwnProperty(nK)) {
+                            j = await this.verify(this.getDataByKey(nK, true), nK, resolvedRules[nK], addError);
+                            if(j === 2){
 
-            console.log("Inside conrules", i, r, key)
-            if(i > -1){
-
-                this.regConErrors(key,r);
-
-                let ruleObj = {inp : key, ruleName : r};
-
-                for (const skey in rule[i][r]) {
-
-                    if (rule[i][r].hasOwnProperty(skey)) {
-
-                        let e = $(`[name="${skey}"]`);
-
-                        console.log(e, skey, rule[i][r]);
-                        e.on('input', this.throttle(async function(){
-
-                            for (const nK in rule[i][r]) {
-
-                                if (rule[i][r].hasOwnProperty(nK)) {
-
-                                    let s = await this.verify(this.getDataByKey(nK, true), nK, this.resolveRule(rule[i][r][nK]), ruleObj);
-                                    if (s === 2) {
+                                if(r == 'only_any_of'){
+                                    s.push(nK);
+                                }else{
+                                    // We are making s here equal to j because then we can check it is number or an array
+                                    s = j;
+    
                                         /**
                                          * Verifier did not found any error 
                                          * inside this field.
                                         */
-                                        console.log(nK, s, "clearing error");
-                                        this.conerrors[key][r] = {};
-                                        for (const k in rule[i][r]) {
-                                            console.log("Inside clearing error", k);
-
-                                            if (this.errors.hasOwnProperty(k)) {
-                                                delete this.errors[k];
-                                            }
-
-                                        }
-                                        break;
-                                    }
+                                        this.deleteErrors(resolvedRules, key, r);
+                                            break;
                                 }
                             }
-                            if (Object.keys(this.conerrors[key][r]).length > 0) {
-                                console.log("when error is found.", skey, this.conerrors[key][r][skey]);
-                                this.errors[skey] = this.conerrors[key][r][skey];
-                            }
-                            // callback(null, verify.errors, verify.rules, verify);    
-                            this.showErrors(null, rule[i][r]);
-                        }, throttlingTime));
+                            
+                        }
+                    }
+                    if(r === 'only_any_of'){
+                        let n = this.only_any_of_errs(key, s, resolvedRules, makeInvalidEmpty, skey);
+                        if(n == 1){
+                            this.deleteErrors(resolvedRules, key, r);
+                        }else if(n == 3){
+                            // Here one field would be valid and other fields needs to be empty
+                                delete this.errors[s[0]];
+                        }
+
+                    }
+                    else if (this.conerrors[key][r].size > 0) {
+                        this.errors[skey] = this.getUserError(skey, r) || this.conerrors[key][r].get(skey);
+                    }
+                    // callback(null, verify.errors, verify.rules, verify);    
+                    callback(null, resolvedRules);
+        }
+        /**
+         * Add conditional error messages in conerror
+         * @param {string} key Input name attribute
+         * @param {object} rules 
+         * @param {Number} throttlingTime Time f
+         * @param {Function} callBack1 
+         * @returns 
+         */
+        runConrules(key, rules, throttlingTime, callBack1) {
+            let [i, r] = this.getConrule(rules);
+            if(i > -1){
+                let rule = (r == 'only_any_of') ? rules[i][r]['fields'] : rules[i][r],
+                ruleObj = this.regConErrors(key,r),
+                resolvedRules = {},
+                callBack =  this.debounce(this.#verifyConRule, throttlingTime),
+                bool = rules[i][r]?.makeInvalidEmpty;
+
+                for (const skey in rule) {
+
+                    if (rule.hasOwnProperty(skey)) {
+                        resolvedRules[skey] = this.resolveRule(rule[skey]);
+                        let e = document.querySelector(`[name="${skey}"]`);
+
+                        e.addEventListener('input', () => callBack(skey, resolvedRules, key, r, ruleObj, callBack1, bool));
                     }
                 
             }
             return i;
+            }
+        }
+        deleteErrors(rule, key, r){
+            this.conerrors[key][r].clear();
+            for (const n in rule) {
+                if (rule.hasOwnProperty(n)) {
+                    delete this.errors[n];
+                }
             }
         }
         //--------------------Returns file size in human readable format-------------------\\
@@ -618,11 +674,12 @@ var [Validator, SubmitForm] = (function () {
         addFunc(callback, ruleName, errorMessage) {
             if (typeof callback === "function") {
                 if (typeof ruleName !== 'string' || typeof errorMessage !== 'string') throw new TypeError("You must provide ruleName and errorMessage for your function", callback);
-                if (typeof Validator.prototype[ruleName] === 'function') throw new TypeError("A rule with this name already exists kindly rename of your rule.");
+                if (typeof Validator.prototype[ruleName] === 'function' || typeof Validator.errorMessages[ruleName] == 'string') throw new TypeError("A rule or error message with this name already exists kindly rename your rule.");
                 Validator.prototype[ruleName] = callback;
-                Validator.prototype.errorMessages = { ...Validator.prototype.errorMessages, ruleName: errorMessage };
+                Validator.errorMessages[ruleName] = errorMessage;
+            }else{
+                throw new Error(`${ruleName} does not refer to a function`);
             }
-            throw new Error(`${ruleName} does not refer to a function`);
         }
         /**
          * @param {Function|object} callback If you pass a
@@ -635,7 +692,7 @@ var [Validator, SubmitForm] = (function () {
          * like this 
          * {    
          *      ruleName : {
-         *           callback : function(value, extras, key){
+         *           callback : function(value, extras, key, addError){
          *                  return value.trim().length;
          *          },
          *          msg : "This field can't be empty"
@@ -643,9 +700,9 @@ var [Validator, SubmitForm] = (function () {
          * }
          *
          * Parametrs Defination of callback:
-         * 1) value:
+         * i) value:
          * here value would be the input value where your applying rule
-         * 2) extras : 
+         * ii) extras : 
          * extras would be null, object , string, bool
          * basically extras are when you pass something
          * with your rule as a constraint like this
@@ -657,8 +714,12 @@ var [Validator, SubmitForm] = (function () {
          * here whole object of dimension is extra 
          * like this {width : 80px, height : 100px}
          *
-         * 3) key:
+         * iii) key:
          * would be name attribute of your input
+         * 
+         * iv) addError:
+         * This is a boolean or an object which controls where the error should be added. If 
+         * you are not adding your own error then you don't need to worry about it. 
          * 
          * 4) Return Values defination:
          *
@@ -700,72 +761,11 @@ var [Validator, SubmitForm] = (function () {
 
         //--------------------WORK WITH ERROR MESSAEGS Data----------------------\\
 
-        get errorMessages() {
-            return {
-                alpha: "This field needs to contain only alphabatic characters i.e A to z.",
-                alpha_s: "This field can only have only alphabatic characters i.e A to z and space",
-                alphaNumeric: "This field can only contain alphanumeric characters.",
-                alphaNumeric_s: "Thie fields can only contain alphanumeric characters and space.",
-                date: 'Please enter a valid date in the format YYYY-MM-DD.',
-                dateAll: 'Please enter a valid date',
-                dateTime: 'Please enter a valid date and time in the format YYYY-MM-DD HH:MM:SS.',
-                required: 'This field is required.',
-                email: 'Please provide a valid email address.',
-                // [Validator.RULE_MATCH]: 'This should match with the {match}.',
-                min: 'The field should contain a minimum of {min} characters.',
-                max: 'The field should contain a maximum of {max} characters.',
-                // [Validator.RULE_SPECIAL]: 'This field must contain a special character such as $, #, %, or @.',
-                noSpecial: 'This field should not contain any special characters like $, #, &, @, or >.',
-                space: 'This field must contain at least one space.',
-                noSpace: 'This field should not contain any spaces.',
-                lowerCase: 'This field should contain lowercase letters.',
-                upperCase: 'This field should contain uppercase letters.',
-                numb: 'This field should contain only digits.',
-                maxnumb: 'This field should not exceed {max} digits.',
-                minnumb: 'This field should contain at least {min} digits.',
-                tillDate: 'The date of this field should be selected before {tillDate}.',
-                shouldOld: 'Age Requirement: You must be at least {shouldOld} years old to access this feature/content.',
-                fileSize: 'The maximum allowed file size is {fileSize} and your file size is {fileSize2}.',
-                fileType: 'The allowed file types are {fileType}',
-                image: 'The uploaded file is not a valid image. Allowed image types are {image}.',
-                fileExt: 'The file is not of valid type allowed file types are {fileExt}.',
-                dimension_equal: 'The uploaded image has a width of {givenWidth}px and height of {givenHeight}px, while the required dimensions are {expectedWidth}x{expectedHeight} pixels.',
-                dimension_smallest: 'The smallest accepted width and height are {expectedWidth}x{expectedHeight} pixels, but your image is smaller than that, {givenWidth}x{givenHeight}.',
-                dimension_highest: 'The largest accepted width and height are {expectedWidth}x{expectedHeight} pixels, but your image is larger than that, {givenWidth}x{givenHeight}.',
-                dimension_width: 'The expected width for this image is {width}px.',
-                dimension_height: 'The expected height for this image is {height}px.',
-                dimension_square: 'This image needs to be a square, meaning it should have the same height and width, like 500x500 pixels.',
-                dimension_square_size: 'This image needs to be square with a width and height of {expectedWidth}x{expectedHeight} pixels.',
-                dimension_aspectRatio: 'The image must have an aspect ratio of {aspectRatio}.',
-                detectMultipleSpaces: 'This field has multiple consecutive spaces.',
-                accept: 'Please check this checkbox.',
-                range: 'The entered number must be between {num1} to {num2}.',
-                numb: 'This field needs to be a valid number without any space',
-                numb_space: 'This field needs to be a valid number.',
-                numb_space_double: 'This field contains more spaces then it should.',
-                password: 'This field needs to contain small case, uppercase, special characters i.e $,#,% etc and digits characters and has a length of atleast {password} characters.',
-                hasLowerCase: 'The field needs to have a lower case character.',
-                hasUpperCase: 'The field needs to have a upper case character.',
-                hasSpecial: 'The field needs to have a special character like $, #, @, & etc.',
-                hasDigit: 'The field needs to have a numeric digit [0-9].',
-                same: 'This field must match with the {same}.',
-                inList: 'The field must be of any of these {inList}.',
-                url: "Please enter a valid HTTP or HTTPS URL.",
-                url_ftp: "Please enter a valid HTTP or HTTPS or FTP URL.",
-                zipCode: "Please enter a valid ZIP/Postal code.",
-                json: "The provided JSON structure is not valid.",
-                ipv4: "Please enter a valid IPv4 address.",
-                ipv6: "Please enter a valid IPv6 address.",
-                isbn: "Please enter a valid ISBN (ISBN-10 or ISBN-13).",
-                upca: "Please enter a valid UPC-A (Universal Product Code).",
-                ean13: "Please enter a valid EAN-13 (European Article Number)."
-            };
-        }
         getUserError(key, ruleName) {
             return this.customMessages?.[key]?.[ruleName] || this.customMessages?.[`${key}_${ruleName}`];
         }
-        getError(key, ruleName, defaultMessage = "An unknown error occured.") {
-            return this.getUserError(key, ruleName) || this.errorMessages?.[ruleName] || defaultMessage;
+        getError(key, ruleName) {
+            return this.getUserError(key, ruleName) || Validator.errorMessages?.[ruleName] || Validator.defaultMsg;
         }
         /**
          * @param {string} key Name input for 
@@ -789,11 +789,12 @@ var [Validator, SubmitForm] = (function () {
          * 
          * }
          */
-        getDimensionError(key, ruleConstraint, replaceMents = {}, ruleName = 'dimension') {
-            return this.customMessages?.[key]?.[ruleName]?.[ruleConstraint] || this.customMessages?.[`${key}_${ruleName}_${ruleConstraint}`] || Validator.strReplace(this.errorMessages[`${ruleName}_${ruleConstraint}`], replaceMents);
+        getDimensionError(key, ruleConstraint, replaceMents = {}) {
+            let ruleName = 'dimension';
+            return this.customMessages?.[key]?.[ruleName]?.[ruleConstraint] || this.customMessages?.[`${key}_${ruleName}_${ruleConstraint}`] || Validator.strReplace(Validator.errorMessages[`${ruleName}_${ruleConstraint}`], replaceMents);
         }
         resolveDimensionErrors(key, errorSubName, array, width, height, addError) {
-            this.addErrorConditionally(this.getDimensionError(key, errorSubName, { givenWidth: width, givenHeight: height, expectedWidth: array[0], expectedHeight: array[1] }), addError)
+            this.addErrorConditionally(key, this.getDimensionError(key, errorSubName, { givenWidth: width, givenHeight: height, expectedWidth: array[0], expectedHeight: array[1] }), addError)
             // this.errors[key] = this.getDimensionError(key, errorSubName, { givenWidth: width, givenHeight: height, expectedWidth: array[0], expectedHeight: array[1] });
         }
         /**
@@ -839,9 +840,9 @@ var [Validator, SubmitForm] = (function () {
          * show in error msg
         */
 
-        addError(attribute, ruleName, extras = null) {
-
-            this.errors[attribute] = this.rE(attribute, ruleName, extras);
+        addError(k, msg) {
+            this.errors[k] = msg || Validator.defaultMsg;
+            return 2;
         }
         /**
          * Add errors in errors object with replacements
@@ -863,12 +864,11 @@ var [Validator, SubmitForm] = (function () {
          * @returns 
          */
         addErrorConditionally(key, errorMsg, addError) {
-            console.log("Inside add error", key, errorMsg, addError);
             if (addError === true) {
                 this.errors[key] = errorMsg;
             } else {
                 window.conerrors = this.conerrors;
-                this.conerrors[addError.inp][addError.ruleName][key] = errorMsg;
+                this.conerrors[addError.inp][addError.ruleName].set(key, errorMsg);
             }
             return 2;
         }
@@ -911,14 +911,25 @@ var [Validator, SubmitForm] = (function () {
         //---------------------SHOWING ERRORS---------------------\\
 
         addOrRemoveClass(key, message, addClass = false) {
-            let elem = $(`[name="${key}"]`);
-            elem.removeClass('is-invalid');
-            elem.next().filter('.invalid-feedback')?.remove();
-            if (addClass) {
-                elem.addClass('is-invalid');
-                elem.after(`<div class="invalid-feedback"><span class="text-danger">${message}</span></div>`);
+            let elem = document.querySelector(`[name="${key}"]`);
+            if (elem) {
+                elem.classList.remove('is-invalid');
+
+                let nextSibling = elem.nextElementSibling;
+                if (nextSibling?.classList?.contains('invalid-feedback')) {
+                    nextSibling.remove();
+                }
+                
+                if (addClass) {
+                    elem.classList.add('is-invalid');
+                    let invalidFeedback = document.createElement('div');
+                    invalidFeedback.className = 'invalid-feedback';
+                    invalidFeedback.innerHTML = `<span class="text-danger">${message}</span>`;
+                    elem.parentNode.insertBefore(invalidFeedback, elem.nextSibling);
+                }
             }
         }
+        
         baseShowErrors(key) {
             if (this.errors.hasOwnProperty(key)) {
 
@@ -928,7 +939,6 @@ var [Validator, SubmitForm] = (function () {
                  */
                 this.addOrRemoveClass(key, this.errors[key], true);
             }
-            // if (this.rules.hasOwnProperty(key)) 
             else {
                 /**
                  * It means it is a valid field
@@ -967,41 +977,33 @@ var [Validator, SubmitForm] = (function () {
          * automatically show errors.
          */
         static async verifyData(obj, formValidator = null) {
-            let verify, callback = obj?.callback;
+            let verify;
             if (obj.hasOwnProperty('rules')) {
                 /**
                  * If rule is passed inside obj paramter
                  * then we need to get both rules and errorMessages from here 
-                 * otherwise we would insert data inside Validator parameter.
+                 * otherwise we would insert data inside formValidator parameter.
                  */
                 verify = new Validator(obj.rules, (obj?.errorMsgs || {}), obj.data);
             } else if (formValidator instanceof Validator) {
                 verify = formValidator
                 verify.data = obj.data;
             }
-            let value;
+            let callback = obj?.callback || verify.showErrors.bind(verify);
             if (verify.data instanceof FormData) {
                 for (const key in verify.rules) {
-                    value = verify.data.getAll(key);
-                    let outPut = await verify.verify(value, key, verify.resolveRule(verify.rules[key]));
-                    if (outPut) continue; //This input either has error or undefined rules so move on to next input
+                    await verify.verify(verify.data.getAll(key), key, verify.resolveRule(verify.rules[key]));
                 }
             }
             else if (typeof verify.data === 'object') {
                 for (const key in verify.rules) {
-                    value = verify.data[key];
-
-                    await verify.verify(value, key, verify.resolveRule(verify.rules[key]));
-                    // if (outPut) continue;
-                    // else break; 
+                    await verify.verify(verify.data[key], key, verify.resolveRule(verify.rules[key])); 
                 }
             }
             let bool = verify.isFailed();
             if (!bool) {
-                if (typeof callback === 'undefined') {
-                    verify.showErrors(null, verify.rules);
-                } else if (typeof callback === 'function') {
-                    callback(verify.rules, verify.errors, verify);
+                if (typeof callback === 'function') {
+                    callback(null, verify.rules, verify.errors, verify);
                 } else {
                     throw new TypeError("The given callback needs to be a function.");
                 }
@@ -1016,73 +1018,59 @@ var [Validator, SubmitForm] = (function () {
             return Object.keys(this.errors).length === 0;
         }
         /**
-         * 
+         * Verifies the data
          * @param {FormDataEntryValue|string} value 
          * @param {string} key Name of the input where to apply rule
          * @param {boolean|Array} [rules] Array of rules to verify
          * @param {boolean|string} [addError=true] For conditional rules
          * @returns {Promise<2|1>} 1 when error is found and 2 when no 
          * error was found
-         * @returns {}
         */
-        async verify(value, key, rule, addError = true) {
-            console.log("Verify ",rule);
-            if (Object.keys(value).length === 0 || typeof value === 'undefined') {
+        async verify(value, key, rule, addError = true, runTillEnd = false) {
+            if (typeof value === 'undefined' || Object.keys(value).length === 0) {
                 //This is special conditions for checkbox
                 if (rule.includes('accept')) {
                     return this.accept(null, null, key, addError);
                 }
             }
-
-            // return this.runRules(rule, value, key);
-            for (const r of rule) {
-                let [ruleName, extra] = this.resolveSubRule(r);
-                if (typeof this[ruleName] === 'function') {
-                    if (typeof value === 'string') {
-                        let i = await this.baseVerifier(ruleName, key, extra, value, addError);
-                        if (i === 1) return 1;
-                        else if (i === 2) continue;
-                    } else {
-                        for (let v of value) {
-                            /**
-                             * Appliying rule one by one on an input.
-                             */
-                            let i = await this.baseVerifier(ruleName, key, extra, v, addError);
-                            if (i === 1) return 1;//error is added so move on next field
-                            else if (i === 2) continue;//Means no error found
-
-                        }
-                    }
-                } else {
-                    throw new Error("There is no rule defined with name " + ruleName + ".");
-                }
-            }
-            return 2;
+            return await this.runRules(value, key, rule, addError, runTillEnd);
         }
-        async runRules(rule, value, key) {
+        async runRules(value, key, rule, addError = true, runTillEnd = false) {
+            let i;
+            if(runTillEnd) i = [];
             for (const r of rule) {
                 let [ruleName, extra] = this.resolveSubRule(r);
                 if (typeof this[ruleName] === 'function') {
-                    if (typeof value === 'string') {
-                        let i = await this.baseVerifier(ruleName, key, extra, value);
-                        if (i === 1) return 1;
-                        else if (i === 2) continue;
-                    } else {
+                    if (Array.isArray(value) || value instanceof FileList) {
                         for (let v of value) {
                             /**
                              * Appliying rule one by one on an input.
                              */
-                            let i = await this.baseVerifier(ruleName, key, extra, v);
-                            if (i === 1) return 1;//error is added so move on next field
-                            else if (i === 2) continue;//Means no error found
+                             i = await this.baseVerifier(ruleName, key, extra, v, addError);
+                             if(i == 1){
+                                if(runTillEnd) continue;
+                                return 1;
+                             }
+                            //  If i != 1 then it must be equal to 
+                            if(runTillEnd) return 2;
+                            continue;
 
                         }
+                    } else {
+                         i = await this.baseVerifier(ruleName, key, extra, value, addError);
+                         if(i == 1){
+                            if(runTillEnd) continue;
+                            return 1;
+                         }
+                        //  If i != 1 then it must be equal to 
+                        if(runTillEnd) return 2;
+                         continue;
                     }
                 } else {
                     throw new Error("There is no rule defined with name " + ruleName + ".");
                 }
             }
-            return 2;
+            return runTillEnd ? 1 : 2;
         }
         /**
          * Base rule verifier verify one rule at a time 
@@ -1099,33 +1087,30 @@ var [Validator, SubmitForm] = (function () {
             /**
              * Appliying rule one by one on an input.
              */
-            console.log("Base", ruleName, v);
-            if (ruleName != 'required' && ruleName != 'any_of' && typeof v == 'string' && v.trim().length == 0) return 2;
-            let bool = await this[ruleName](v, extra, key, addError);
-            switch (bool) {
-                case false:
-                case 0:
-                    /**
-                    * It means this field has error;
-                    */
-                    this.addErrorConditionally(key, this.rE(key, ruleName, extra), addError)
-                    // if (addError===true) {
-                    //     this.addError(key, ruleName, extra);
-                    // } else {
-                    //     console.log("key", key);
-                    //     this.conerrors[addError][key] = this.rE(key, ruleName, extra);
-                    // }
-                    return 1;
-                case 2:
-                    /**
-                     * When a rule would add the error by itself 
-                     * it would return true because some rules
-                     * are pretty painful for addError like
-                     * dimension
-                     */
-                    return 1;
-            }
-            return 2;
+            if (ruleName != 'required' && ruleName != 'any_of' && ruleName != 'only_any_of' && typeof v == 'string' && v.trim().length == 0) return 2;
+            try{
+                let bool = await this[ruleName](v, extra, key, addError);
+                switch (bool) {
+                    case false:
+                    case 0:
+                        /**
+                        * It means this field has error;
+                        */
+                        this.addErrorConditionally(key, this.rE(key, ruleName, extra), addError)
+                        return 1;
+                    case 2:
+                        /**
+                         * When a rule would add the error by itself 
+                         * it would return true because some rules
+                         * are pretty painful for addError like
+                         * dimension
+                         */
+                        return 1;
+                }
+                return 2;
+            }catch(e){
+                console.error(e);
+            };
         }
         /**
          * Get rule as an array if it is string
@@ -1168,6 +1153,19 @@ var [Validator, SubmitForm] = (function () {
             return [ruleName, extra];
         }
         /**
+         * 
+         * @param {HTMLInputElement} e Pass the element which value need 
+         * @param {boolean} [all=false] In file list case do you want all files
+         * @returns 
+         */
+        getDataFromInp(e, all = false){
+            if (e.type === 'file') {
+                if (all) return e.files;
+                return e.files?.[0];
+            }
+            return e.value
+        }
+        /**
          * Returns the data specific for rule by data object or input value or files
          * @param {string} key 
          * @param {boolean} [all=false]  In case of array of fileList it just
@@ -1175,15 +1173,8 @@ var [Validator, SubmitForm] = (function () {
          * and filelist make it true
          * @returns {Array|FileList|string}
          */
-        getDataFromInp(e, all){
-            if (e.type === 'file') {
-                if (all) return e.files;
-                return e.files?.[0];
-            }
-            return e.value
-        }
         getDataByKey(key, all = false) {
-            let e = SubmitForm.selectElem(`[name="${key}"]`, HTMLElement);
+            let e = Validator.selectElem(`[name="${key}"]`, HTMLElement);
             return this.getDataFromInp(e,all);
         }
         getData(key, all = false) {
@@ -1207,18 +1198,19 @@ var [Validator, SubmitForm] = (function () {
             return numb;
         }
         checkFile(value) {
-            return value instanceof File && value !== 'pplication/octet-stream';
+            return value instanceof File && value.type !== 'application/octet-stream';
         }
         /**---------------------------------Rules start from here-------------------*/
 
         //----------------------RULE OF CHECKBOX------------------------\\
         accept(v, e, key, addError) {
-            let elem = SubmitForm.selectElem(`[name='${key}']`, HTMLInputElement, true);
-            if (!elem.prop('checked')) {
+            let elem = Validator.selectElem(`[name='${key}']`, HTMLInputElement);
+            if (!elem.checked) {
                 return this.addErrorConditionally(key, this.rE(key, 'accept', e), addError);
             }
             return 1;
         }
+        //----------------------------Conditional Rules-----------------------\\
         /**
          * If any of the field needs to fulfill the given the rules
          * like a field a and b both have their own rule and we want
@@ -1229,9 +1221,7 @@ var [Validator, SubmitForm] = (function () {
          * obj = {input1:"p",input2 : "rule2"}
          */
         async any_of(value, obj, k) {
-            this.regConErrors(k, 'any_of');
-            let addError = { inp: k, ruleName: 'any_of' };
-            console.log("Inside any_of", value, obj, k);
+            let addError = this.regConErrors(k, 'any_of');
             for (const key in obj) {
                 if (obj.hasOwnProperty(key)) {
                     //Check all rules on an input one by one here obj[key] is rules
@@ -1239,30 +1229,84 @@ var [Validator, SubmitForm] = (function () {
                     if (await this.verify(this.getData(key, true), key, this.resolveRule(obj[key]), addError) == 2) return 1;
                 }
             }
-            console.log("After validate", value, obj, k);
-            console.log(this.conerrors);
-            this.errors[k] = this.getUserError(k, 'any_of') || this.conerrors[k]['any_of'][k];
+            this.addError(k, this.getUserError(k, 'any_of') || this.conerrors[k]['any_of'].get(k));
             return 2;
         }
+        /**
+         * Only any of the given field can match the rules not all 
+         * field should be valid
+         * field2: {
+         *              only_any_of : {
+         *       // Either field1 should be email or 
+         * field2 should be numb both can happen at the same time
+         *                  field1 : "email",
+         *                  field2 : "numb"
+         *              }
+         *          }
+         * @param {string|File} value 
+         * @param {object} fields 
+         * @param {string} k Name attribute of the input
+         */
+        async only_any_of(v, obj, k){
+            /**
+             * If obj don't contain fields property 
+             * then obj itself is fields.
+             */
+            let fields = obj?.fields || obj,
+            ruleName = 'only_any_of', addError = this.regConErrors(k, ruleName),
+            j = [],i;
+            // Object fields are fields
+            for (const key in fields) {
+                if (fields.hasOwnProperty(key)) {
+                    i = await this.verify(this.getData(key, true), key, this.resolveRule(fields[key]), addError);
+                    if(i == 2){
+                        j.push(key);
+                    }
+                }
+            }
+            return this.only_any_of_errs(k, j, fields, obj?.makeInvalidEmpty);
+        }
+        only_any_of_errs(k, validKeys, obj, bool = false,  skey = false){
+            let twoCount = validKeys.length, ruleName = 'only_any_of';
+
+            if(bool && twoCount === 1){
+                    for (const key in obj) {
+                        if(obj.hasOwnProperty(key)){
+                            if(key == validKeys[0]) continue;
+                                if(this.required(this.getData(key), null, key)){    
+                                    this.addError(key, this.getUserError(k, ruleName)?.makeInvalidEmpty || Validator.errorMessages.makeInvalidEmpty);
+                                  if(skey)
+                                    return 3;
+                            }
+                        }
+                    }
+            }
+            if(twoCount === 1) return 1;
+                if(skey)
+                    // Adding error in the sub key
+                    return this.addError(skey, this.getUserError(skey, ruleName) ? this.getConErr(skey, ruleName, twoCount) : this.conerrors[k][ruleName].get(skey));
+                    
+            return this.addError(k, this.getConErr(k, ruleName, twoCount));
+        }
+        getConErr(k, ruleName, twoCount){
+            if(twoCount === 3)
+             return this.getUserError(k, ruleName)?.['makeInvalidEmpty'] || Validator.errorMessages['makeInvalidEmpty'];
+
+           return this.getUserError(k, ruleName)?.[twoCount > 1 ? 'matchMultiple' : 'matchNone'] || this.conerrors[k][ruleName].get(k) || Validator.errorMessages.makeInvalidEmpty;
+        }
         async any_of_rules(value, array, k){
+            let s, obj = this.regConErrors(k, 'any_of_rules');
 
-            window.errors = this.errors;
-
-            this.regConErrors(k, 'any_of_rules');
-
-            let s, obj = {inp : k, ruleName : 'any_of_rules'};
 
             for (let i = 0; i < array.length; i++) {
                 s = await this.verify(value, k, this.resolveRule(array[i]), obj);
-                console.log("Inside any of rules",s);
                 if(s === 2){
                     // It means no errors
                     break;
                 }
             }
-            // console.log(this.conerrors[k]['any_of_rules']);
             if(s == 1){
-                this.errors[k] = this.getUserError(k, 'any_of_rules') || this.conerrors[k]['any_of_rules'][k];
+                this.addError(k, this.getUserError(k, 'any_of_rules') || this.conerrors[k]['any_of_rules'].get(k));
             }
             return s > 1 ? 1 : 2;
         }
@@ -1301,10 +1345,10 @@ var [Validator, SubmitForm] = (function () {
          * @returns {1|2} 1 when no error is found to when it has put it
          * its own error.
          */
-        detectMultipleSpaces(value, extra, key, addError) {
+        detectMultipleSpaces(value, e, key, addError) {
             let bool = value.replace(/\s+/g, ' ') === value;
             if (!bool) {
-                return this.putError(key, ruleName, addError);
+                return this.putError(key, ruleName, null, addError);
             }
             return bool;
         }
@@ -1339,7 +1383,7 @@ var [Validator, SubmitForm] = (function () {
          * @param {string} value 
          * @param {string} toMatchkey Name attribute of input with
          * which you want to match this input value.
-         * @returns 
+         * @returns {boolean}
          */
         same(value, toMatchkey) {
             let data = this.getData(toMatchkey);
@@ -1381,7 +1425,7 @@ var [Validator, SubmitForm] = (function () {
                 errorName = 'min';
             }
             if (errorName) {
-                let errorMsg = this.getUserError(key, errorName) || this.getUserError(key, 'password') || Validator.strReplace(this.errorMessages[errorName], { ['{min}']: (extra || 8), field: 'password' }, false);
+                let errorMsg = this.getUserError(key, errorName) || this.getUserError(key, 'password') || Validator.strReplace(Validator.errorMessages[errorName], { ['{min}']: (extra || 8), field: 'password' }, false);
                 return this.addErrorConditionally(key, errorMsg, addError);
             }
             return 1;
@@ -1417,7 +1461,8 @@ var [Validator, SubmitForm] = (function () {
             return bool;
         }
         range(value, range, key, addError) {
-            if (value.trim().length > 0 && (value < range[0] || value > range[1])) {
+            // if (value.trim().length > 0 && (value < range[0] || value > range[1])) {
+            if (value < range[0] || value > range[1]) {
                 return this.putError(key, 'range', { num1: range[0], num2: range[1] }, addError);
             }
             return 1;
@@ -1623,6 +1668,13 @@ var [Validator, SubmitForm] = (function () {
             }
             return 1;
         }
+        async notRule(value, obj, key) {
+            if (await this.verify(value, key, this.resolveRule(obj), this.regConErrors(key, 'notRule'), true) !== 1) {
+                return this.addError(key, this.getUserError(key, 'notRule'));
+            }
+            return 1;
+        }
+        
         //------------------------RULES FOR IMAGES---------------------------------\\
         /**
          * Compare dimension of images always resolve to 2
@@ -1666,11 +1718,10 @@ var [Validator, SubmitForm] = (function () {
             return new Promise((resolve) => {
                 if ((extras?.mimeTypes || Validator.imgMimeTypes).includes(value.type)) {
                     const reader = new FileReader();
-                    reader.onload = (e) => {
+                    reader.onload = e => {
 
                         let image = new Image();
                         image.src = e.target.result;
-
                         image.onload = () => {
                             let width = image.width,
                                 height = image.height;
@@ -1679,17 +1730,18 @@ var [Validator, SubmitForm] = (function () {
                                 if (extras?.height) {
                                     if (extras.height !== height) {
                                         this.addErrorConditionally(key, this.getDimensionError(key, 'height', { height }), addError);
+                                        resolve(2);
                                         // this.errors[key] = this.getDimensionError(key, 'height', { height })
                                     }
                                 }
                                 if (extras?.width) {
                                     if (extras.width !== width) {
                                         this.addErrorConditionally(key, this.getDimensionError(key, 'width', { width }), addError);
+                                        resolve(2);
                                         // this.errors[key] = this.getDimensionError(key, 'width', { width })
                                     }
                                 }
                             }
-
                             else if (extras.hasOwnProperty('equal')) {
                                 /**
                                  * We want both width and height exactly of the width and
@@ -1698,6 +1750,7 @@ var [Validator, SubmitForm] = (function () {
 
                                 if (extras.equal[0] !== width || extras.equal[1] !== height) {
                                     this.resolveDimensionErrors(key, 'equal', extras.equal, width, height, addError);
+                                    resolve(2);
                                 }
                             }
                             else if (extras.hasOwnProperty('smallest') || extras.hasOwnProperty('highest')) {
@@ -1708,7 +1761,7 @@ var [Validator, SubmitForm] = (function () {
                                      */
                                     if (width < extras.smallest[0] || height < extras.smallest[1]) {
                                         this.resolveDimensionErrors(key, 'smallest', extras.smallest, width, height, addError);
-                                        // resolve(true);
+                                        resolve(2);
                                     }
                                 }
                                 if (extras?.highest) {
@@ -1718,7 +1771,7 @@ var [Validator, SubmitForm] = (function () {
                                     */
                                     if (width > extras.highest[0] || height > extras.highest[1]) {
                                         this.resolveDimensionErrors(key, 'highest', extras.highest, width, height, addError);
-                                        // resolve(true);
+                                        resolve(2);
                                     }
                                 }
                             } else if (extras.hasOwnProperty('square')) {
@@ -1730,32 +1783,33 @@ var [Validator, SubmitForm] = (function () {
                                      */
                                     if (width !== height) {
                                         this.addErrorConditionally(key, this.getDimensionError(key, 'square', {}), addError)
-                                        // this.errors[key] = this.getDimensionError(key, 'square', {});
+                                        resolve(2);
                                     }
                                 } else {
                                     if (!(width === extras.square && height === extras.square)) {
                                         this.resolveDimensionErrors(key, 'square_size', [extras.square, extras.square], width, height, addError);
+                                        resolve(2);
                                     }
                                 }
                             } else if (extras.hasOwnProperty('ratio')) {
                                 let aspectRatio = width / height;
                                 let expectedAspectRatio = extras.ratio;
                                 if (typeof expectedAspectRatio === "string") {
-                                    let [nom, dom] = expectedAspectRatio.split(":");
+                                    let [nom, dom] = expectedAspectRatio.split(":").map(Number);
                                     expectedAspectRatio = nom / dom;
-                                    if (isNaN(expectedAspectRatio)) throw new TypeError(`The string given as aspectRatio ${extras.ratio} is invalid the format of string should be like this 16:9, 4.809889:1.788923 etc.`);
+                                    if (isNaN(expectedAspectRatio)) throw new TypeError(`The given aspectRatio ${extras.ratio} is invalid the format should be like this 16:9, 4.8089:1.7823 etc.`);
                                 }
                                 /**
                                  * the less than sign shows that the difference of
                                  * aspectRatio and expectedAspectRatio should not
                                  * be more than 0.1
                                  */
-                                if (!(Math.abs(aspectRatio - expectedAspectRatio) < (extras?.difference || 0.1))) {
+                                if (!(Math.abs(aspectRatio - expectedAspectRatio) < (extras?.difference ?? 0.1))) {
                                     this.addErrorConditionally(key, this.getDimensionError(key, 'aspectRatio', { aspectRatio: extras.ratio }), addError);
-                                    // this.errors[key] = this.getDimensionError(key, 'aspectRatio', { aspectRatio: extras.ratio })
+                                    resolve(2);
                                 }
                             }
-                            resolve(2);
+                            resolve(1);
                         }
                     }
                     reader.readAsDataURL(value);
@@ -1764,16 +1818,16 @@ var [Validator, SubmitForm] = (function () {
                     * resolve to 2 because we can't give dimensions error
                     * but image method has already added it's error
                     */
-                    resolve(this.image(value, extras?.mimeTypes, key));
+                    resolve(this.image(value, extras?.mimeTypes, key, addError));
                 }
 
             })
         }
         image(value, possibleMimeTypes, key, addError) {
-            if (value instanceof File) {
+            if (this.checkFile(value)) {
                 let mimes = Validator.imgMimeTypes;
                 if (possibleMimeTypes) mimes = possibleMimeTypes;
-                if (!mimes.includes(value.type) && value.type !== 'application/octet-stream') {
+                if (!mimes.includes(value.type)) {
                     /**
                      * We need to add error manually and we would return
                      * true because if Mimetypes are not given then extra * would be null.
@@ -1796,7 +1850,7 @@ var [Validator, SubmitForm] = (function () {
          */
         required(value, extra, key) {
             if (typeof value !== 'string') {
-                let fileInput = SubmitForm.selectElem(`[name="${key}"`, HTMLElement);
+                let fileInput = Validator.selectElem(`[name="${key}"`, HTMLElement);
                 return fileInput?.files?.length > 0 ? 1 : 0;
             }
             return value.trim().length > 0 ? 1 : 0;
@@ -1827,7 +1881,7 @@ var [Validator, SubmitForm] = (function () {
         url(url, allowFtp, key, addError) {
             if (allowFtp) {
                 if (!/^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(url))
-                    return this.putError(key, 'url_ftp', addError);
+                    return this.putError(key, 'url_ftp', null, addError);
                 return 1;
             }
             return /^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(url);
@@ -1927,577 +1981,4 @@ var [Validator, SubmitForm] = (function () {
             return !regex.test(value);
         }
     }
-
-    class SubmitForm {
-        /**
-         * 
-         * @param {File} blob 
-         * @param {Number} [chunkSize=1] In Mbs
-         * @returns {Promise} On resolve case get an object contain
-         *  these keys 
-         * {
-         *      name: file name, 
-         *      base64: base64 string,
-         *      type: file type, 
-         *      lastModified : file last modified time in ms,
-         *      size : filesize
-         * }
-         */
-        static readBlobAsBase64(blob, chunkSize = 1) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                chunkSize = chunkSize * 1024 * 1024;//in Mbs
-                let offset = 0;
-                const base64Chunks = [];
-
-                reader.onload = function (event) {
-                    if (base64Chunks.length === 0)
-                        base64Chunks.push(event.target.result);
-                    else
-                        base64Chunks.push(event.target.result.split(',')[1]);
-                    if (offset < blob.size) {
-                        readNextChunk();
-                    } else {
-                        const completeBase64 = base64Chunks.join('');
-                        resolve({
-                            "name": blob.name,
-                            "filesize": blob.size,
-                            "type": blob.type,
-                            "lastModified": blob.lastModified,
-                            "base64": completeBase64,
-                            "base64size": SubmitForm.base64size(completeBase64),
-
-                        });
-                    }
-                };
-
-                reader.onerror = function () {
-                    reject(reader.error);
-                };
-
-                function readNextChunk() {
-                    const chunk = blob.slice(offset, offset + chunkSize);
-                    reader.readAsDataURL(chunk);
-                    offset += chunk.size;
-                }
-
-                readNextChunk();
-            });
-        }
-        /**
-         * Calculate the size of bytes
-         * @param {string} base64 Base64 decoded string
-         * @returns {Number} size in bytes
-         */
-        static base64size(base64) {
-            // Remove data URI scheme if present
-            const cleanedBase64 = base64.includes(',') ? base64.split(',')[1] : base64;
-            const length = cleanedBase64.length;
-            const sizeInBytes = (length * 3) / 4;
-            let paddingCount = 0;
-            while (cleanedBase64[length - paddingCount - 1] === '=') {
-                paddingCount++;
-            }
-            return sizeInBytes - (paddingCount * 3) / 4;
-
-        }
-        /**
-         * 
-         * @param {Array<object>} data 
-         * @param {Array<object>|null} inputs  array containing name value objects
-         * @returns {Array<object>}
-         */
-        // static checkFormInputs(data, inputs) {
-        //     if (inputs !== null) {
-        //         /**
-        //         * If we want to edit or add certain values 
-        //         */
-        //         inputs.forEach(obj => {
-        //             let indexToChange = data.findIndex(field => field.name === obj.name);
-        //             if (indexToChange > -1) {
-        //                 data[indexToChange].value = obj.value
-        //             } else {
-        //                 data.push(obj);
-        //             }
-        //         });
-        //     }
-        //     return data;
-        // }
-        static #checkFormObjInputs(data, obj) {
-            if (obj.inputs !== null) {
-                /**
-                 * It means in this Formdata obj we need to add
-                 * these data 
-                 * Which can contain files , FILELIST, array, string, blob 
-                 * Obj.inputs need to be an object in this case
-                 * Containing files like this 
-                 * {
-                 * "profile" : FILE 
-                 * "Dp" : FILELIST|Array of files
-                 * }
-                 * In case of multiple files name needs to be like this name[]
-                 */
-
-                if (Array.isArray(obj.inputs)) {
-                    /**
-                     * It means an array conatining objects like this 
-                     * [
-                     *      {
-                     *          "profile" : FILE 
-                     *          "Dp" : "My db"
-                     *      },
-                     *      {
-                     *          "profile2" : FILE 
-                     *          "Dp" : FILELIST|Array of files
-                     *      },
-                     * ]
-                     */
-                    for (const input of obj.inputs) {
-                        data = SubmitForm.#addInput(data, input, obj.overwrite);
-                    }
-                } else if (typeof obj.inputs === 'object') {
-                    data = SubmitForm.#addInput(data, obj.inputs, obj.overwrite);
-                } else {
-                    throw new TypeError("Object, FormData and arrays are only allowed " + typeof obj.inputs + "  is not allowed.");
-                }
-            }
-            return data;
-        };
-
-        static #addInput(data, inputObject, overwrite) {
-            if (inputObject instanceof FormData) {
-                /**
-                 * Creating set so dublicate keys won't come again and again
-                 */
-                for (const key of new Set(inputObject.keys())) {
-                    let all = inputObject.getAll(key);
-                    data = SubmitForm.#insideLoop(data, key, all, overwrite)
-                }
-            } else {
-                for (const key of Object.keys(inputObject)) {
-                    data = SubmitForm.#insideLoop(data, key, inputObject[key], overwrite);
-                }
-            }
-            return data;
-        }
-        /**
-         * For sake of dry principle created this function
-         * @param {FormData|object} data 
-         * @param {string} key 
-         * @param {string|object|Iterable|FileList} value 
-         * @param {string} overwrite 
-         * @returns 
-         */
-        static #insideLoop(data, key, value, overwrite) {
-            let bool = !(overwrite === 'overwritenone' || overwrite === 'overwritefiles');
-            data = SubmitForm.overWritedata(data, key, overwrite);
-            if (typeof value === 'object' || Array.isArray(value) || value instanceof FileList) {
-                // In case of fileList or array or multple inputs maybe text inputs with same name
-                for (const input of value) {
-                    if (
-                        data.has(key)
-                        && !(data.get(key) instanceof File)//I think that data.get(key) can be replaced with value
-                        && bool
-                    ) {
-                        /**
-                         * Means that in case of text inputs we are overwriting text inputs
-                         * if overwrite option is not 'overwritenone' or not 'overwritefiles'
-                         * That's they for text inputs we only get to keep one input no array.
-                         */
-                        data.delete(key);
-                    }
-                    data.append(key, input);
-                }
-            } else {
-                //It can be a single file or a normal input
-                data.append(key, value);
-            }
-            return data;
-        }
-        /**
-         * @param {HTMLFormElement | string} selector Resolve a selector or throws error
-         * @param {{ new (): HTMLFormElement; prototype: HTMLFormElement}}[instance=HTMLFormElement] Type of element you want to select like HTMLElement, 
-         * HTMLInputElement etc if your element doesn't match with this slector
-         * @param {boolean} [withJquery = false] want to select the element with jquery
-         * @returns {HTMLElement} 
-         * @throws TypeError
-         */
-
-        static selectElem(selector, instance = HTMLFormElement, withJquery = false) {
-            let elem = null;
-            if (selector instanceof instance) elem = selector;
-            else if (typeof selector === 'string') elem = withJquery ? $(selector) : document.querySelector(selector);
-
-            else if (selector?.[0] instanceof instance) elem = withJquery ? selector : selector[0];//It is a jquery object
-            if (!(elem instanceof instance || elem?.[0] instanceof instance)) throw new TypeError(`No element in dom exists with this ${selector} selector.`);
-            return elem;
-        }
-        /**
-         * Returns node list of input[type='file'] inside given form
-         * @param {string|HTMLFormElement} form
-         * @returns {NodeList} 
-         */
-        static fileInputs(form) {
-            let selector = SubmitForm.selectElem(form);
-            return selector.querySelectorAll('input[type="file"]');
-        }
-        /**
-         * Select the files from a form
-         * @param {HTMLFormElement | string} form Needs to be a form selector.
-         * @param {boolean} [fileTobase64=false] If you want to get the files as base64 string
-         * @returns {object}
-         */
-
-        static async selectFiles(form, fileTobase64 = false) {
-            let dataObj = {};
-            let fileInputs = SubmitForm.fileInputs(form);
-            if (fileInputs.length > 0) {
-                for (const input of fileInputs) {
-                    if (input.files.length > 0) {
-                        let name = input.getAttribute('name');
-
-                        try {
-                            /**
-                             * Assigning complete FILELIST to the elements
-                             */
-                            dataObj[name] = input.files;
-                            if (fileTobase64) {
-                                let array = [];
-                                for (const name in dataObj) {
-                                    for (const file in dataObj[name]) {
-                                        array.push(await SubmitForm.readBlobAsBase64(file));
-                                    }
-                                    dataObj[name] = array;
-                                }
-                            }
-                        } catch (error) {
-                            console.error(error);
-                        }
-                    }
-                }
-            }
-            return dataObj;
-        }
-
-        static quickSumbit(obj) {
-            let form = SubmitForm.selectElem(obj.form);
-            form.onsubmit = async e => {
-                e.preventDefault();
-                await SubmitForm.justSubmit(obj);
-            }
-
-        }
-        // static submitMultiple(obj){
-        //     if(Array.isArray(obj.form)){
-        //         for (const form of obj.form) {
-        //             form.onsubmit = async e => {
-        //                 let
-        //             };
-        //         }
-        //     }
-        // }
-        static overWritedata(data, key, overwrite) {
-            if (overwrite !== "overwritenone") {
-                if (overwrite === "overwriteall" && data.has(key)) data.delete(key);
-                else if (overwrite === "overwritefiles" && data.has(key)) {
-                    // It means only overwrite files
-                    if (data.get(key) instanceof File)
-                        data.delete(key);
-                } else if (overwrite === "overwritebutnotfiles" && data.has(key)) {
-                    if (!(data.get(key) instanceof File))
-                        data.delete(key);
-                }
-            }
-            return data;
-        }
-        /**
-         * Elegantly submits form with your flexibality
-         * @param {object} obj an object containing all this properties
-         * 
-         * @property {object | FormData | string | HTMLFormElement} [obj.form]*  In case of 
-         *  string It needs to be form Selector. It can be instance of HTMLFormElement too.
-         *  It can ba a normal object too as well as it can be a FormData object too.
-         * 
-         * @property {object} [obj.ajaxSettings]*  Containg ajax configurations 
-         * like success, onerror, 
-         * beforeSend, data, dataType, type, url if your type is post then you don't need to 
-         * enter it post is set in this function by default.
-         * 
-         * 
-         * @property {string} [obj.overwrite] (optional) Possible values for this parameter
-         * is:
-         * 1) overwriteAll: (It is default)
-         * 
-         * For overwriteAll any dublicate name keys or obejct keys which you have given will 
-         * be overwritten and this way only last value would be contain by this name keys/
-         * For example:
-         * Your form contain inputs with name {"input1" : "value1"} and in your input object
-         * you also give this key like this obj.inputs = {"input1" : "value2"} notice that in
-         * both objects name keys are same so it would only consider "input1" = "value2" which
-         * has overwritten your form value.
-         * 
-         * 2) overwriteNone: 
-         * 
-         * If you don't want to overwrite this values you can use "overwriteNone"
-         * which stops overwriting all things, for this case 
-         * you would get an array on server like this input1 =>[ 0 => "value1", 1 => "value2"].
-         * 
-         * 3) overwriteFiles:
-         * 
-         * The "overwriteFiles" explicitly only overwrite files doesn't overwrite
-         * text or other inputs.
-         * 
-         * 4) overwriteButNotFiles:
-         * 
-         * "overwriteButNotFiles" only overwrites text data doesn't overwrite
-         * files.
-         * 
-         *
-         * @property {Array} [obj.resetKeys] (optional) If you want to delete some inputs pass
-         * their name inside in an array i.e ['input1', 'input2'];
-         *  
-         * 
-         * @property {Array|object|FormData} [obj.inputs] (optional)
-         * In case of object It can be a normal object or a Formdate object 
-         * which will be appended with the existing data. If duplicate data 
-         * would be found inside your object it would be overwritten based
-         * on the overwrite parameter.
-         * In case of array it can contain multiple objects and Formdata object.
-         * As a value for these objects you can use, form inputs value
-         * (string|number|FILE|FILELIST), FILELIST, Array (string|File), strings, Number.
-         * 
-         * 
-         * @property {object} [obj.validate] (optional) The object For validtaion
-         * of your form. You can either pass Valdiator instance or
-         * just pass rules.
-         * 
-         * Note: When you pass dataType: "JSON" all data would be
-         * converted into a valid json. If your form contain files
-         * all files would be converted into base64 and if a single input
-         * holds multiple files then an array of base64 files would be assign to
-         * that input. Never use base64 for files bigger than 20mb because it
-         * takes too much time and a lot of space in user browser.
-         * 
-         * @property {string|object} [obj.responseElem] (optional) If you didn't 
-         * pass on success function
-         * inside the ajaxSettings and quickly want to show the response you can use 
-         * responseElem which can handle showing response.
-         * In case of string this it needs to be selector for an html element. This
-         * function would select that element where you want to show the 
-         * response and put all data from server on there.
-         * 
-         * In case of an object it should contain two keys 
-         * {
-         *      elem: ".show-html-element-class",
-         *      key : "This should be the key of the json which is coming from the server like
-         * if server is sendion json data and it has a key response you can pass response here it
-         * will show the data. of the respose key of the json not all json data."
-         * }
-         * 
-         * @returns {Promise}
-         */
-
-        static async justSubmit(obj) {
-            obj = {
-                overwrite: "overwriteAll", //overwrite all is by default
-                inputs: null,
-                ...obj
-            };
-            // For developer ease
-            obj.overwrite = obj.overwrite.toLowerCase();
-
-            let ajaxSettings = {
-                type: "POST",
-                ...obj.ajaxSettings
-            }
-
-            let inJson = ajaxSettings?.dataType?.toLowerCase() === 'json';
-            let data;
-
-            /**
-             * Start form handling
-             */
-            if (obj.form instanceof HTMLFormElement || typeof obj.form === 'string') {
-                /**
-                 * This is because in case of files selection we might 
-                 * gonna need this
-                 */
-                let form = SubmitForm.selectElem(obj.form);
-                data = new FormData(form);
-            } else if (typeof obj.form === 'object') {
-                /**
-                 * For both normal object and form data object
-                 */
-                data = obj.form;
-            }
-
-            if (data instanceof FormData) {
-                if (obj.hasOwnProperty('resetKeys')) {
-                    /**
-                    * obj.resetKeys is an array containing name keys to be reset delete.
-                    */
-                    obj.resetKeys.forEach(key => data.delete(key));
-                }
-                /**
-                 * Checking inputs array
-                 */
-                data = SubmitForm.#checkFormObjInputs(data, obj);
-
-            }
-            if (obj.hasOwnProperty('validate') || obj.hasOwnProperty('rules')) {
-                if (obj.validate instanceof Validator) {
-                    if (!await Validator.verifyData({ data: data }, obj.validate))
-                        return false;
-                }
-                else {
-                    let bool = obj.hasOwnProperty('validate');
-                    if (bool && !await Validator.verifyData({ data, ...obj.validate })) {
-                        return false;
-                    } else if (!await Validator.verifyData({ data, rules: obj.rules })) {
-                        return false;
-                    }
-                }
-            };
-            if (inJson) {
-                /**
-                 * Converting formdata or object into json
-                 */
-                if (!ajaxSettings.hasOwnProperty('contentType')) ajaxSettings['contentType'] = 'application/json';
-                if (!ajaxSettings.hasOwnProperty('processData')) ajaxSettings['processData'] = false;
-                data = await SubmitForm.objectToJson(data, obj.overwrite);
-            }
-            ajaxSettings['data'] = data;
-            /**
-             * End form handling
-             * 
-             * Start working on success and response
-             */
-            if (!ajaxSettings.hasOwnProperty('success') && obj.hasOwnProperty('responseElem')) {
-                let elem;
-                let key = false;
-                if (typeof obj.responseElem === 'string') elem = $(obj.responseElem);
-                else {
-                    elem = $(obj.responseElem['elem']); //It means obj.responseElem is an object
-                    key = obj.responseElem['key'];
-                }
-                ajaxSettings.success = data => {
-
-                    elem.css('display', 'block');
-                    if (key) elem.html(data[key]);//key can be message or json key anything
-                    else elem.html(data);
-                }
-            }
-            $.ajax(ajaxSettings);
-        }
-
-        static inJson(data, json = false) {
-            if (json) {
-                let jsonData = {};
-                data.forEach(field => {
-                    jsonData[field.name] = field.value
-                });
-                return JSON.stringify(jsonData);
-            }
-            return data;
-        }
-        /**
-         * @param {object} form_data_obj Original object which is created for JSON.stringify()
-         * @param {string} key Key where data should be assigned to the form_data_obj
-         * @param {array|FileList|IterableIterator} inputs array of inputs 
-         * @param {boolean} bool whether fields should be overwritten or not
-         * @returns 
-         */
-        static async #arrayInJsonInloop(form_data_obj, key, inputs, bool) {
-            const array = [], textInputs = [];
-            for (const input of inputs) {
-                if (input instanceof File)
-                    array.push(await SubmitForm.readBlobAsBase64(input));
-                else {
-                    textInputs.push(input);
-                }
-            }
-            if (array.length > 0) form_data_obj[key] = array;
-            if (textInputs.length > 0 && array.length > 0) {
-                /**
-                 * Means files exist with this key so 
-                 * add _text end of over text inputs for 
-                 * ease on server side.
-                 */
-                if (bool && textInputs.length > 1)
-                    /**
-                     * It means with current key files already exists in
-                     * this form_data_obj 
-                     * So modify array key by _text
-                     * And adding it as array because these are multiple 
-                     * inpute textInputs.length > 1
-                     */
-                    form_data_obj[`${key}_text`] = textInputs;
-
-                else
-                    /**
-                     * This are multiple inputs with same name 
-                     * we are overwriting
-                     * And file is with same key to
-                     * so modify key with _text
-                     * and only allow last input to be shown on 
-                     * server as string or number
-                     */
-                    form_data_obj[`${key}_text`] = textInputs[textInputs.length - 1];
-
-            }
-            else if (textInputs.length > 0) {
-                /**No files so we get to keep the original key  and
-                 * no files also suggets that textInputs are more then 1
-                */
-                form_data_obj[key] = bool ? textInputs : textInputs[textInputs.length - 1];
-            }
-            return form_data_obj;
-        }
-        /**
-         * @param {FormData} obj 
-         * @param {boolean} [json=false]
-         */
-        static async objectToJson(obj, overwrite) {
-            let form_data_obj = {};
-            const bool = (overwrite === 'overwritenone' || overwrite === 'overwritefiles');
-            /**
-             * Creating set because set only holds unique values
-             */
-            if (obj instanceof FormData) {
-                for (let key of new Set(obj.keys())) {
-                    let inputs = obj.getAll(key);
-                    if (inputs.length > 1) {
-                        /**
-                         * It means this attribute has multple files Its
-                         * name would be something like name[]
-                         */
-                        form_data_obj = await SubmitForm.#arrayInJsonInloop(form_data_obj, key, inputs, bool);
-                    }
-                    else {
-                        if (inputs[0] instanceof File) form_data_obj[key] = await SubmitForm.readBlobAsBase64(inputs[0]);
-                        else form_data_obj[key] = inputs[0];
-                    }
-                }
-            } else {
-                for (let key in obj) {
-                    if (obj[key] instanceof FileList || Array.isArray(obj[key])) {
-                        form_data_obj = await SubmitForm.#arrayInJsonInloop(form_data_obj, key, inputs, bool);
-                    } else {
-                        if (obj[key] instanceof File)
-                            form_data_obj[key] = await SubmitForm.readBlobAsBase64(obj[key]);
-                        else
-                            /**
-                             * Means a normal input
-                             */
-                            form_data_obj[key] = obj[key];
-                    }
-                }
-            }
-            return JSON.stringify(form_data_obj);
-        }
-
-    }
-
-    return [Validator, SubmitForm];
-
 })();

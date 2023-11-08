@@ -5,11 +5,13 @@
 
 FormValidator is your all-in-one solution for simplified form management. Whether you're working on a simple contact form or a complex multi-step wizard, FormValidator streamlines form creation, validation, and submission, making your web development tasks more efficient. It offers a wide range of features to enhance your web development experience.
 
+**Note**: For form submission it uses jQuery ajax. If you just want to use validator or submitForm then You can use submitform.js or validator.js. Validator.js also works without jquery.
+
 ## Features
 
 #### Effortless Form Validation
 
-FormValidator makes setting up and managing form validation rules a breeze. It offers a comprehensive set of predefined rules, including basic checks like required fields and valid email addresses, as well as advanced criteria like upc-a, ean-13 validation. Configuring validation rules is intuitive, eliminating the need for complex regular expressions and JavaScript functions.
+FormValidator makes setting up and managing form validation rules a breeze. It offers a comprehensive set of predefined rules, including basic checks like required fields and valid email addresses, as well as advanced criteria like upc-a, ean-13, conditional validation. Configuring validation rules is intuitive, eliminating the need for complex regular expressions and JavaScript functions.
 
 #### Seamless Integration
 
@@ -262,14 +264,15 @@ This methods are for validation.
 - [getfileSize](#getfileSize)
 - [strReplace](#strReplace)
 
-This are input modifiers
+These are input modifiers
 
 - [setMaxdate](#setMaxdate)
 - [setNum](#setNum)
 - [setPhone](#setPhone)
 
-#### Insatnce Methods
-This are instance method useful to know if you are defining your custom rules.
+#### **Insatnce Methods**
+
+- **This are instance method useful to know if you are defining your custom rules.**
 - [Instance Creation](#constructing-the-instance-of-validator)
 - [putError](#putError)
 - [addError](#addError)
@@ -324,10 +327,17 @@ This are instance method useful to know if you are defining your custom rules.
 - [space](#space)
 - [tillDate](#tillDate)
 - [url](#url)
-- [upca](#upca)
 - [upperCase](#upperCase)
 - [zipCode](#zipCode)
 
+#### Conditional Rules
+
+- [any_of](#any_of)
+- [any_of_rules](#any_of_rules)
+- [only_any_of](#only_any_of)
+
+#### Invalidating Rule
+- [notRule](#notRule)
 
 #### Rules Explanation
 
@@ -784,6 +794,125 @@ nput2 : {
 ##### zipCode
 - Validates a zip code.
 
+#### Conditional Rules Explanation
+- There are three main conditional rules avaiable [any_of](#any_of), [only_any_of](#only_any_of) and [any_of_rules](#any_of_rules). This rules don't add directly their errors inside errors object they use a conditional error object where they add their errors and based on the rule they add any one message to the `errors` object, You don't need to worry about this if you don't make any conditional rule.
+
+##### any_of
+- This is a conditional rule where you can pass rules for multiple inputs and any of the inputs fulfills all rules then no other input would generate errors. 
+
+##### Examlple
+- You have 2 fields one of them need to be field where as other one can be empty. So you can pass this rule like this.
+
+```javascript
+let rules = {
+    input1 : {
+        any_of : {
+            input1 : "required|min:6|max:19",
+            input2 : "required|email",
+        }
+    }
+}
+/**
+ * Well both of the field has different error if 
+ * input2 is a valid email then input 2 would 
+ * not generate any error.
+ */
+
+let errorMessages : {
+    input1 : {
+        //You can also pass msg with require, min, max
+        any_of : "Either field should contain 6 or more characters or email field should be filled."
+    },
+    input2 : {
+        // You can't pass here errorMessage with any_of key
+        email : "If you didn't fill input1 then please provide a valid email"
+    }
+}
+```
+
+##### any_of_rules 
+
+- This rule apply other rules conditionally to an input. Pass this rule as an array. Th array can contain sub arrays of rules. If any of the array main rules passes the validation other rules won't generate any error.
+
+```javascript
+let rules = {
+    input : [
+        'required',//This is out of any_of rule which means this field is required no matter what
+        {
+            any_of_rules : [
+                "url", //Either a url or should contain minimum nine characters.
+                {min: 9}
+            ]
+        }
+        
+    ]
+}
+
+let errorMsgs = {
+    input : {
+        // Can also pass error msgs with url and min key
+        any_of_rules : "Field either a url or should contain minimum nine characters."
+    }
+}
+```
+
+##### only_any_of 
+- Similar as any_of except when one field got valid and other field is invalid and still not empty it asks users to make it empty that field also see [any_of](#any_of).
+
+###### Usage
+```javascript
+
+let validate = {
+   rules : {
+        inp1: {
+            only_any_of: {
+                makeInvalidEmpty: true, //set it to true and it would make invalid fields empty if one field got valid.
+                // Either inp1 should be email or inp2 should be numb both can't happen at the same time
+                fields : {
+                    //Sends inputs with the fields key if you are passing 'makeInvalidEmpty' key. 
+                    inp1: "required|email",
+                    inp2: "required|numb"
+                },
+            }
+        },
+   },
+   erroMsgs : {
+    field1: {
+            only_any_of: {
+                matchNone: "Either you give email in this field or you give number in the field2.",
+                matchMultiple: "You pass the email in this field and also number in the field2. You need to just choose one field.",
+                makeInvalidEmpty: "Make this field empty."
+            }
+        },
+        field2: {
+            // Pass error for field2 only when you are using liveVerifier
+            only_any_of: {
+                matchNone: "Either you give number in this field or you give email in the field1.",
+                matchMultiple: "You pass the number in this field and also email in the field2. You need to just choose one field."
+            }
+        }
+   }
+}
+```
+
+##### notRule
+- Pass other rules here it would validate input if it doesn't match with rules. Rules can be array, object, string.
+
+###### Usage
+```javascript
+let validate = {
+    rules : {
+        input : {
+            notRule : ['zipCode','min:9']//If both of those rules are occured invalid then tfis field is gonna be valid.
+        }
+    },
+    errorMsgs : {
+        input_notRule : "This filed should not be a zipcode and shouldn't contain 9 characters",//You can't pass error msgs with the 'zipCode' and 'min' keys
+    }
+}
+```
+
+
 #### Explanation of Static Methods.
 
 ##### Add your own rules.
@@ -804,12 +933,14 @@ A validation rule typically consists of a callback function, a rule name, and an
 
   The callback function takes the following parameters:
   
-  - `value`: The input value to which the rule is being applied.
+  - `value`: The input value to which the rule is being applied. It can be a `File`, `string`, `null`.
   - `extras`: This parameter can be `null`, an object, a string, or a boolean, depending on the constraints you've specified with your rule (e.g., "min:6"). For example, an object of dimension might be passed as extras, like `{ width: "80px", height: "100px" }`.
   - `key`: The name attribute of your input element.
+  - `addError`: It either be `true` or an `object`. If you are adding your own error than pass this parameter to [putError](#putError) otherwise you don't need it.
+
 ```javascript
 Validator.extend(
-    function(value, extras, key){
+    function(value, extras, key, extras){
         return extras.includes(value);
     },
     'insideTheList', 
@@ -845,7 +976,7 @@ Validator.extend(rulesObj);
 /**
 * @param {object} obj can either only contain data for validation
 * or can also have rules and custom error messages etc.
-* @property {object|FormData} data | 
+* @property {object|FormData} data |  
 * @property {object} rules 
 * @property {object | undefined} errorMsgs 
 * @property {Function|undefined} [callback=null] if you give give callback as a function
@@ -1026,10 +1157,10 @@ Validator.setNum(".numb-input", 90);
 
 - **`rules` (Type: Object)**
 
-   The `rules` object is used to define validation rules for input fields. It contains key-value pairs where the key is the input field's name attribute, and the value can be either a string or an array. Inputs can have multiple rules.
+   The `rules` object is used to define validation rules for input fields. It contains key-value pairs where the key is the input field's name attribute, and the value can be string, object and array. Inputs can have multiple rules.
 
    - **Rules as a String**: 
-     If using a string, rule constraints are added after the rule name, separated by a colon (":"). For example:
+     If using a string, rule constraints (arguments to that rule) are added after the rule name, separated by a colon (":"). For example:
      
      ```javascript
      rules: {
@@ -1049,6 +1180,19 @@ Validator.setNum(".numb-input", 90);
          },
          'max:12'
        ]
+     }
+     ```
+   - **Rules as an Object**: 
+     If you want to pass a single rule for an input You can use object too
+
+     ```javascript
+     rules: {
+       profile_image: {
+        dimension : {
+            width : 900,
+            hight : 1200
+        }
+       }
      }
      ```
 
@@ -1111,19 +1255,23 @@ let configObj  = {
 ```
 
 ##### putError
-- Add errors in error object also [strReplace](#strreplace).
+- Add errors in error object also see [strReplace](#strreplace).
 ```javascript
 /**
 * Add errors in errors object with replacements
 * @param {string} key Name of the input you want to add error.
 * @param {string} ruleName Name of your rule.
-* @param {object|null} replaceMents is the parameter of strReplace
+* @param {object|null} [replaceMents=null] is the parameter of strReplace
+* @param {boolean|object} [addError=true] If it is true then it adds error
+* in errors object and if it is an object then it adds error in conerrors
+* which is a conditional error object and it's error messages are not shown
+* on user interface until user add it's errors in errors object of 
+* Validator.
 * @param {boolean} [curlyBraces=true] is the parameter of strReplace
 * @returns {2}
-*
 */
 
-putError(key, ruleName, replaceMents = null, curlyBraces = true) 
+putError(key, ruleName, replaceMents, addError, curlyBraces);
 ```
 
 ##### getData
@@ -1258,5 +1406,7 @@ let obj = {
     //All other properties
 }
 SubmitForm.quickSubmit(obj);
-
 ```
+For more usage usage can find script.js file here in [FormValidator](#https://github.com/Muhthishimiscoding/FormValidatorPlus).
+
+If you like this library please recommend it to fellow devs, and star this repository [FormValidator](#https://github.com/Muhthishimiscoding/FormValidatorPlus). Thanks for using it.

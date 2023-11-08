@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,12 +10,14 @@
             font-family: Arial, sans-serif;
             background-color: #f2f2f2;
         }
-        .invalid-feedback{
+
+        .invalid-feedback {
             padding: 10px;
             color: red;
         }
-        .is-invalid{
-            border: 2px solid rgb(245, 12, 12)!important;
+
+        .is-invalid {
+            border: 2px solid rgb(245, 12, 12) !important;
         }
 
         .container {
@@ -64,6 +67,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>Sample Form</h1>
@@ -93,7 +97,7 @@
             </div>
             <div class="form-group">
                 <label for="textareaInput">Confirm Password:</label>
-                <input id="textareaInput" name="conpassword" >
+                <input id="textareaInput" name="conpassword">
             </div>
             <div class="form-group">
                 <label for="textareaInput">Text Area:</label>
@@ -125,6 +129,15 @@
                 <input type="text" name="url" id="">
             </div>
             <div class="form-group">
+                <label>Field 1</label>
+                <input type="text" name="field1" id="">
+            </div>
+            <div class="form-group">
+                <label>Field 2</label>
+                <input type="text" name="field2" id="">
+            </div>
+
+            <div class="form-group">
                 <label>Any of rules</label>
                 <input type="text" name="anInput" id="">
             </div>
@@ -133,174 +146,40 @@
                 <input type="text" name="zipCode" id="">
             </div>
             <div class="form-group">
+                <label>Custom rule</label>
+                <input type="text" name="myRule" >
+            </div>
+            <div class="form-group">
+                <label>New rule</label>
+                <input type="text" name="newRule" >
+            </div>
+            <div class="form-group">
+                <label>Not rule</label>
+                <input type="text" name="customInput" >
+            </div>
+            <div class="form-group">
                 <label>Please enter a valid json</label>
                 <textarea type="text" name="json" id=""></textarea>
 
-                
+
             </div>
             <div class="form-group">
-            <select name="n" id="">
-                <option selected value=""></option>
-                <option>Ms</option>
-                <option>bs</option>
-            </select>
+                <select name="n" id="">
+                    <option selected value=""></option>
+                    <option>abc</option>
+                    <option>bs</option>
+                </select>
             </div>
             <button type="submit" class="submit-button">Submit</button>
         </form>
     </div>
     <script src="/auth/jquery.min.js"></script>
     <!-- <script src="formValidator.min.js"></script> -->
-    <script src="Group/formValidator.js"></script>
+    <script src="minified Version/formValidator.min.js"></script>
     <!-- <script src="/auth/validator.js"></script> -->
     <!-- <script src="/auth/form.js"></script> -->
-    <script>
-        let form = document.querySelector('.auth-form');
-        let formdata = new FormData();
-        Validator.setMaxdate('#date', 18);
-        Validator.setPhone('[name="numb"]', true);
-        formdata.append('myformdatakey','myformdatavalue');
-        formdata.append('myformdatakey','This is a dublicate of all myformdatakey');
-        // let rules = {
-        //             myinput : 'required|min:6|max:12|email',
-        //             textarea : [ {[Model.RULE_MIN]: 19}],
-        //             checkbox : 'accept',
-        //             dateTime : [ {tillDate : -19}],
-        //             singleFile :['required',
-        //                     {fileSize: (1024*1024)*3},//5mb (1024*1024)*5
-        //                     {
-        //                         dimension: 
-        //                     {smallest : [735, 1102], highest : [1000, 1500] }
-        //                     // {square : 500}
-        //                     // {
-        //                     //     ratio : "1:1", 
-        //                     //     difference: 5e-324
-        //                     // }
-        //                     }
-        //             ],
-        //             newInput : 'required|min:6',
-        //             numb : [
-        //                 {
-        //                     range : [4,9]
-        //                 },
-        //                 {numb_space : true}
-        //             ],
-        //             password : 'password',
-        //             conpassword : 'same:password'
-        //             // ['dimension', {equal : [300, 500]}]
-        //         };
-         
-                let validate =  {
-                rules : {
-                    url : 'url:1',
-                    myinput : 'required|min:6|max:12|email',
-                    textarea : [ {min: 19}],
-                    checkbox : 'accept',
-                    dateTime : ['date', {tillDate : -19}],
-                    singleFile :['required',
-                            {fileSize: (1024*1024)*3},//5mb (1024*1024)*5
-                            {
-                                dimension: 
-                            {smallest : [735, 1102], highest : [1000, 1500] }
-                            }
-                    ],
-                    zipCode : 'zipCode',
-                    newInput : 'required|min:6',
-                   anInput : [
-                    'required',
-                    {
-                    any_of_rules : [
-                            "zipCode", 
-                        "min:9"
-                    ]
-                   }],
-                    numb : [
-                        {
-                            range : [4,9]
-                        },
-                        {numb_space : true}
-                    ],
-                    password :
-                        {
-                                any_of : {
-                                    password : 'required|password',
-                                    conpassword : 'required|same:password',
-                             }
-                        },
-                
-                    // password : 'password',
-                    // conpassword : 'same:password',
-                    inList : [{
-                        inList : ['abc', 'cdf', 'ghj']
-                    }],
-                    n : ['required',{
-                        inList : ['abc', 'cdf', 'ghj']
-                    }] ,
-                    json : 'json:1',
-                    upc : 'required|dateTime'
-                    // ['dimension', {equal : [300, 500]}]
-                },
-                
-                errorMsgs : {
-                    myinput: {
-                    required: "This is a custom message for required field",
-
-                    },
-                    singleFile : {
-                        fileSize : "The file size exceeds max file size which is 3mb."
-                    },
-                    url : {
-                        url_ftp : 'The entered url is not a valid url'
-                    },
-                    anInput_any_of_rules :  "This field either needs to be a zip code or contains 9 characters."
-                    
-                },
-                // callback : function(errors){
-                //     console.log(errors);
-                // }
-             }
-            //  pakistan : ['a', 'b', 'c'];
-            //  china : ['d', 'e', 'f'];
-        let obj = {
-            form : form,
-            validate ,
-            overwrite: "overwritenone",
-            overwrite: "overwriteFiles",
-            resetKeys : ['singleFile', 'multipleFiles[]'],
-            ajaxSettings: {
-                url:'http://localhost/layout/index.php',
-                dataType: "json",
-                success: (data) => {
-                    console.log(data);
-                },
-            },
-        };
-         form.onsubmit = async e => {
-            e.preventDefault();
-            let filesObj = await SubmitForm.selectFiles(form);
-            obj.inputs = [filesObj, {"myinput": "o@gmail.com"}, formdata];
-            console.log(filesObj);
-            SubmitForm.justSubmit(obj);
-
-         }
-        //  console.log(obj);
-     
-                Validator.liveVerify({...validate, callback : null});
-                // callback : function(key, errors, rules){
-                //     console.log("Inside personal callback live verify", key, errors, rules);
-                // }
-        // SubmitForm.quickSumbit({
-        //     form : '.auth-form',
-        //     // selectFiles : true,
-        //     ajaxSettings: {
-        //         url:'http://localhost/layout/index.php',
-        //         dataType: "JSON",
-        //         success: (data) => {
-        //             console.log(data);
-        //         },
-        //         contentType: 'application/json',
-        //                         // processData: false,
-        //     },
-        // });
-    </script>
+    <script src="script.js"></script>
+  
 </body>
+
 </html>
