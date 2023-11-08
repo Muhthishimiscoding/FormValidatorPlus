@@ -1407,6 +1407,6 @@ let obj = {
 }
 SubmitForm.quickSubmit(obj);
 ```
-For more usage usage can find script.js file here in https://github.com/Muhthishimiscoding/FormValidatorPlus.
+For more usage usage can find script.js file here in https://github.com/Muhthishimiscoding/FormValidatorPlus/blob/main/script.js.
 
 If you like this library please recommend it to fellow devs, and star this repository https://github.com/Muhthishimiscoding/FormValidatorPlus. Thanks for using it.
