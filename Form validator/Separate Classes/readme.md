@@ -1,0 +1,2 @@
+- This folder contains separate versions of both Valdiator and SubmitForm classes, so if you just want to submit form without validating data you can use submitform.js in your project. If you just want to use Validator 
+then valdiator.js is for you which doesn't even require jQuery to work.

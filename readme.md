@@ -5,7 +5,7 @@
 
 FormValidator is your all-in-one solution for simplified form management. Whether you're working on a simple contact form or a complex multi-step wizard, FormValidator streamlines form creation, validation, and submission, making your web development tasks more efficient. It offers a wide range of features to enhance your web development experience.
 
-**Note**: For form submission it uses jQuery ajax. If you just want to use validator or submitForm then You can use submitform.js or validator.js. Validator.js also works without jquery.
+**Note**: For form submission it uses jQuery ajax. If you just want to use validator or submitForm then You can use [submitform.js](https://github.com/Muhthishimiscoding/FormValidatorPlus/blob/main/Form%20validator/Separate%20Classes/submitform.js) or its min verion [submitform.min.js](https://github.com/Muhthishimiscoding/FormValidatorPlus/blob/main/minified%20Version/Separate%20Classes/submitform.min.js), [Validator.js](https://github.com/Muhthishimiscoding/FormValidatorPlus/blob/main/Form%20validator/Separate%20Classes/validator.js) or [Validator.min.js](https://github.com/Muhthishimiscoding/FormValidatorPlus/blob/main/minified%20Version/Separate%20Classes/Validator.min.js). Validator.js  also works without jquery.
 
 ## Features
 
