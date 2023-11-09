@@ -14,7 +14,6 @@
 var Validator = (function () {
     'use strict';
     return class Validator{
-        // Works great without jQuery
         /**
          * @param {HTMLFormElement | string} selector Resolve a selector or throws error
          * @param {{ new (): HTMLFormElement; prototype: HTMLFormElement}}[instance=HTMLFormElement] Type of element you want to select like HTMLElement, 
@@ -106,6 +105,12 @@ var Validator = (function () {
             'image/bmp',
             'image/webp'
         ];
+        static classes = ['is-invalid', 'invalid-feedback'];
+        static changeCssClasses(classes){
+            if(classes.length != 2)
+            throw Error(`You should give 2 classes to replace default classes which are ${Validator.classes.join(', ')}.`);
+            Validator.classes = classes;
+        }
         /**
          * @param {object} rules In this object key would be input name
          * attribute and value would be either a string or an array. 
@@ -913,18 +918,18 @@ var Validator = (function () {
         addOrRemoveClass(key, message, addClass = false) {
             let elem = document.querySelector(`[name="${key}"]`);
             if (elem) {
-                elem.classList.remove('is-invalid');
+                elem.classList.remove(Validator.classes[0]);
 
                 let nextSibling = elem.nextElementSibling;
-                if (nextSibling?.classList?.contains('invalid-feedback')) {
+                if (nextSibling?.classList?.contains(Validator.classes[1])) {
                     nextSibling.remove();
                 }
                 
                 if (addClass) {
-                    elem.classList.add('is-invalid');
+                    elem.classList.add(Validator.classes[0]);
                     let invalidFeedback = document.createElement('div');
-                    invalidFeedback.className = 'invalid-feedback';
-                    invalidFeedback.innerHTML = `<span class="text-danger">${message}</span>`;
+                    invalidFeedback.className = Validator.classes[1];
+                    invalidFeedback.textContent = message;
                     elem.parentNode.insertBefore(invalidFeedback, elem.nextSibling);
                 }
             }

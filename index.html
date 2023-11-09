@@ -1,23 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
+    
+    <head>
+        <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sample Form</title>
+    <title>Usage of FormValidator</title>
+    <link rel="stylesheet" href="style.css">
     <style>
+        
         body {
             font-family: Arial, sans-serif;
             background-color: #f2f2f2;
-        }
-
-        .invalid-feedback {
-            padding: 10px;
-            color: red;
-        }
-
-        .is-invalid {
-            border: 2px solid rgb(245, 12, 12) !important;
         }
 
         .container {
@@ -78,46 +71,40 @@
             </div>
             <div class="form-group">
                 <label for="singleFileInput">Number:</label>
-                <input type="text" name="numb">
+                <input type="text" class='form-control' name="numb">
             </div>
-            <!-- <div class="form-group">
-                <label for="multipleFileInput">Multiple File Upload:</label>
-                <input type="file" id="multipleFileInput" name="multipleFiles[]" multiple>
-            </div> -->
-            <button type="submit" class="submit-button">Submit</button>
-
             <div class="form-group">
                 <label for="Ean">Upc:</label>
-                <input id="Ean" name="upc">
+                <input id="Ean" class='form-control' name="upc">
             </div>
 
             <div class="form-group">
                 <label for="textareaInput">Password:</label>
-                <input id="textareaInput" name="password">
+                <input id="textareaInput" class='form-control' name="password">
             </div>
             <div class="form-group">
                 <label for="textareaInput">Confirm Password:</label>
-                <input id="textareaInput" name="conpassword">
+                <input id="textareaInput" class='form-control' name="conpassword">
             </div>
             <div class="form-group">
                 <label for="textareaInput">Text Area:</label>
-                <textarea id="textareaInput" name="textarea" rows="4"></textarea>
+                <textarea id="textareaInput" class='form-control' name="textarea" rows="4"></textarea>
             </div>
             <div class="form-group">
                 <label for="simpleInput">myinput:</label>
-                <textarea id="simpleInput" name="myinput"></textarea>
+                <textarea id="simpleInput" class='form-control' name="myinput"></textarea>
             </div>
             <div class="form-group">
                 <label for="simpleInput">New input</label>
-                <input id="simpleInput" name="newInput"></input>
+                <input id="simpleInput" class='form-control' name="newInput"></input>
             </div>
             <div class="form-group">
                 <label>In list</label>
-                <input type="text" name="inList">
+                <input type="text" class='form-control' name="inList">
             </div>
             <div class="form-group">
                 <label for="simpleInput">dateTime:</label>
-                <input type="datetime-local" name="dateTime" id="date">
+                <input type="datetime-local" class='form-control' name="dateTime" id="date">
             </div>
             <div class="form-group">
                 <label for="simpleInput">Please agree with our terms and agreements</label>
@@ -126,40 +113,40 @@
             </div>
             <div class="form-group">
                 <label>Please enter a valid url</label>
-                <input type="text" name="url" id="">
+                <input type="text" class='form-control' name="url" id="">
             </div>
             <div class="form-group">
                 <label>Field 1</label>
-                <input type="text" name="field1" id="">
+                <input type="text" class='form-control' name="field1" id="">
             </div>
             <div class="form-group">
                 <label>Field 2</label>
-                <input type="text" name="field2" id="">
+                <input type="text" class='form-control' name="field2" id="">
             </div>
 
             <div class="form-group">
                 <label>Any of rules</label>
-                <input type="text" name="anInput" id="">
+                <input type="text" class='form-control' name="anInput" id="">
             </div>
             <div class="form-group">
                 <label>Please enter a valid zipCode</label>
-                <input type="text" name="zipCode" id="">
+                <input type="text" class='form-control' name="zipCode" id="">
             </div>
             <div class="form-group">
                 <label>Custom rule</label>
-                <input type="text" name="myRule" >
+                <input type="text" class='form-control' name="myRule" >
             </div>
             <div class="form-group">
                 <label>New rule</label>
-                <input type="text" name="newRule" >
+                <input type="text"  class='form-control' name="newRule" >
             </div>
             <div class="form-group">
                 <label>Not rule</label>
-                <input type="text" name="customInput" >
+                <input type="text" class='form-control' name="customInput" >
             </div>
             <div class="form-group">
                 <label>Please enter a valid json</label>
-                <textarea type="text" name="json" id=""></textarea>
+                <textarea type="text" class ='form-control' name="json" id=""></textarea>
 
 
             </div>
@@ -175,11 +162,10 @@
     </div>
     <script src="/auth/jquery.min.js"></script>
     <!-- <script src="formValidator.min.js"></script> -->
-    <script src="minified Version/formValidator.min.js"></script>
-    <!-- <script src="/auth/validator.js"></script> -->
+    <script src="Form validator/formValidator.js"></script>
+    <!-- <script src="Form validator/Separate Classes/validator.js"></script> -->
     <!-- <script src="/auth/form.js"></script> -->
     <script src="script.js"></script>
-  
 </body>
 
 </html>

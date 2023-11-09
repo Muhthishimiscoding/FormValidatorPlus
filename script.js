@@ -13,7 +13,7 @@ formdata.append('myformdatakey', 'myformdatavalue');
 
 formdata.append('myformdatakey', 'This is a dublicate of all myformdatakey');
 
-let callBackObj = {
+let myCustomRules = {
     newRule : {
         callback : function(v, e,k,addError){
         return v === 'Important value';
@@ -28,7 +28,7 @@ let callBackObj = {
         msg : "Your given value should be 'Hi'."
     }
 }
-Validator.extend(callBackObj);
+Validator.extend(myCustomRules);
 let validate = {
     rules: {
         url: 'url:1',
@@ -133,29 +133,29 @@ let validate = {
     // }
 }
 
-let obj = {
-    form: form,
-    // validate,
-    overwrite: "overwritenone",
-    overwrite: "overwriteFiles",
-    resetKeys: ['singleFile', 'multipleFiles[]'],
-    ajaxSettings: {
-        url: 'http://localhost/layout/index.php',
-        // dataType: "json",
-        success: (data) => {
-            console.log(data);
-        },
-        // contentType : false, no need it to set it
-        // processData: false
-    },
-};
-form.onsubmit = async e => {
-    e.preventDefault();
-    let filesObj = await SubmitForm.selectFiles(form);
-    obj.inputs = [filesObj, { "myinput": "o@gmail.com" }, formdata];
-    console.log(filesObj);
-    SubmitForm.justSubmit(obj);
+// let obj = {
+//     form: form,
+//     validate,
+//     overwrite: "overwritenone",
+//     overwrite: "overwriteFiles",
+//     resetKeys: ['singleFile', 'multipleFiles[]'],
+//     ajaxSettings: {
+//         url: 'http://localhost/layout/index.php',
+//         // dataType: "json",
+//         success: (data) => {
+//             console.log(data);
+//         },
+//         // contentType : false, no need it to set it
+//         // processData: false
+//     },
+// };
+// form.onsubmit = async e => {
+//     e.preventDefault();
+//     let filesObj = await SubmitForm.selectFiles(form);
+//     obj.inputs = [filesObj, { "myinput": "o@gmail.com" }, formdata];
+//     console.log(filesObj);
+//     SubmitForm.justSubmit(obj);
 
-}
+// }
 
 Validator.liveVerify({ ...validate, callback: null });

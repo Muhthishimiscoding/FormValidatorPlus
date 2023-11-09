@@ -83,6 +83,7 @@ var [Validator, SubmitForm] = (function () {
          */
         static REG_SPECIAL = /[^\p{L}0-9\s.]/u;
         static defaultMsg = "An unknown error occured";
+        static classes = ['is-invalid', 'invalid-feedback'];
         static imgMimeTypes = [
             'image/jpeg',
             'image/jpg',
@@ -91,6 +92,11 @@ var [Validator, SubmitForm] = (function () {
             'image/bmp',
             'image/webp'
         ];
+        static changeCssClasses(classes){
+            if(classes.length != 2)
+            throw Error(`You should give 2 classes to replace default classes which are ${Validator.classes.join(', ')}.`);
+            Validator.classes = classes;
+        }
         /**
          * @param {object} rules In this object key would be input name
          * attribute and value would be either a string or an array. 
@@ -900,14 +906,13 @@ var [Validator, SubmitForm] = (function () {
             return str;
         }
         //---------------------SHOWING ERRORS---------------------\\
-
         addOrRemoveClass(key, message, addClass = false) {
             let elem = $(`[name="${key}"]`);
-            elem.removeClass('is-invalid');
-            elem.next().filter('.invalid-feedback')?.remove();
+            elem.removeClass(Validator.classes[0]);
+            elem.next().filter(`.${Validator.classes[1]}`)?.remove();
             if (addClass) {
-                elem.addClass('is-invalid');
-                elem.after(`<div class="invalid-feedback"><span class="text-danger">${message}</span></div>`);
+                elem.addClass(Validator.classes[0]);
+                elem.after(`<div class="${Validator.classes[1]}">${message}</div>`);
             }
         }
         baseShowErrors(key) {

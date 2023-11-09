@@ -257,6 +257,7 @@ This methods are for validation.
 - [extend](#add-your-own-rules)
 - [verifydata](#verifydata)
 - [liveVerify](#liveVerify)
+- [changeCssClasses](#changeCssClasses)
 - [setRegexSpecial](#setRegexSpecial)
 - [setImgMimeTypes](#setImgMimeTypes)
 - [getUtcDate](#getUtcDate)
@@ -364,10 +365,6 @@ lpha_s : "Notice here _s when you pass alpha rule with 1 you need to pass it's e
 
 - Validates that a field contains only alphanumeric characters (letters and numbers). It has same configurations as alpha rule (like allowing space).
 
-<!-- ##### alphaNumeric_s
-
-- Validates that a field contains only alphanumeric characters (letters and numbers) and spaces. -->
-
 ##### date
 
 - Validates that a date field is in the format YYYY-MM-DD.
@@ -405,12 +402,12 @@ let rules = {
 */
 let rules = {
     image_input : [
-
-   dimension : {
-   width : 900,
-   height : 700,//both in px can also pass individually for just checking height or width
-   mimetypes : ['image/png','image/jpeg']
- }
+        'required',
+        dimension : {
+            width : 900,
+            height : 700,//both in px can also pass individually for just checking height or width
+            mimetypes : ['image/png','image/jpeg']
+        }
 
     ]
 }
@@ -428,8 +425,12 @@ let rules = {
 */
 let rules = {
     image_input : [
-required',
-dimension : {equal : [1200,800]}}//WxH
+    'required',
+        {
+            dimension : {
+                equal : [1200,800]
+            }
+        }//WxH
     ]
 }
 /**
@@ -442,20 +443,16 @@ dimension : {equal : [1200,800]}}//WxH
 */
 let rules = {
     image_input : [
-required',
-
-   dimension : {
-mallest : [1200, 800]//WxH
-
-
-    ],
+        'required',
+        dimension : {
+             smallest : [1200, 800]//W, H
+            },
+        ],
     image_input2 : [
-
-   dimension : {
-mallest : [1200, 800],
-ighest : [1800, 1400]
-   }
-
+        dimension : {
+            smallest : [1200, 800],
+            highest : [1800, 1400]
+        }
     ]
 }
 /**
@@ -466,39 +463,42 @@ ighest : [1800, 1400]
 */
 let rules = {
     image_input : [
-required',
+    'required',
 
    dimension : {
-quare : 0
+        square : 0
    }
-
     ],
     image_input2 : [
 
    dimension : {
-quare : 500
+        square : 500
    }
-
     ]
 }
 /**
 * @property {string} ratio pass the desired aspect ratio
 * here it would compare the desire aspect ratio for the image
 * like 16:9.
-* @property {number|undefined} difference a number of difference
+* @property {number} [difference = 0.1] a number of difference
 * which is allowed b/w expected aspect ratio
-* and user image aspect ratio the lowest value can be 5e-324.
-* The lowest floating point number in js. you can't pass
-* 0 here.
-* @property {string} key name attribute of your input
-* @see getDimensionError 
+* and user image aspect ratio the lowest value can be 0 or Number.EPSILON.
 */
 
 let rules = {
     image_input : [
-required',
- dimension : {equal : "16:9" } }//also pass a number here too
-    ]
+        'required',
+        {dimension : {equal : "16:9" } }//can pass a number here too
+    ],
+    image_input2 : [
+        'required',
+        {
+            dimension : {
+                equal : "16:9",//can pass a number here too like 1.77
+                difference : 1.7
+            } 
+       }
+    ],
 }
 ```
 
@@ -517,7 +517,7 @@ Validate the extension of file you can pass allowed extensions here.
 ```javascript
 let rules = {
     input : {
-ileType :['doc', 'docx', 'pdf', 'epub'] //pass allowed file extensions here without dot
+        fileExt :['doc', 'docx', 'pdf', 'epub'] //pass allowed file extensions here without dot
     }
 }
 ```
@@ -537,7 +537,7 @@ let rules = {
 ```javascript
 let rules = {
     input : {
-ileType :['image/png', 'image/jpeg'] //pass allowed mimeTypes here
+        fileType :['image/png', 'image/jpeg'] //pass allowed mimeTypes here
     }
 }
 ```
@@ -563,7 +563,7 @@ Validate the image types It comes with predefined allowed mimetypes.
  * image/jpeg, image/jpg, image/png, image/gif, image/bmp, image/webp
  */
 let rules = {
-    input : "image" // don't need to pass mimeTypes here it has predefined mimeTypes but if you want you can pass mimeTypes
+    input : "image" // don't need to pass mimeTypes here it has predefined mimeTypes but if you want you can pass mimeTypes as an array
 }
 ```
 
@@ -584,10 +584,8 @@ let rules = {
 ```javascript
 let rules = {
     input : [
-required', 
-
-   inList : ['apple', 'banana', 'citrus']//user needs to enter any of these value in order to validate the field.
-
+        'required', 
+        inList : ['apple', 'banana', 'citrus']//user needs to enter any of these value in order to validate the field.
     ]
 }
 ```
@@ -597,8 +595,8 @@ required',
 ```javascript
 let rules = {
     input : [
-required',
-json',//Remember that a string like this " " can be a valid json too so if you only wnat to allow json object pass 1 as an argument to this rule i.e "json:1"
+        'required',
+        'json',//Remember that a string like this " " can be a valid json too so if you only wnat to allow json object pass 1 as an argument to this rule i.e "json:1"
     ]
 }
 ```
@@ -706,7 +704,11 @@ let rules = {
 - Validate a field against a regex pattern and returns true if pattern matches, also see [noRegex](#noRegex).
 ```javascript
 let rules = {
-    input : [{regex : /[^\p{L}0-9\s.]/u}]
+    input : [
+        {
+            regex : /[^\p{L}0-9\s.]/u
+            }
+        ]
 }
 ```
 
@@ -732,8 +734,8 @@ add error with "detectMultipleSpaces" key so for multiple spaces detection pass 
 ```javascript
 let rules = {
     confirm_password : [
-required',
-same:password'
+            'required',
+            'same:password'
     ]
 }
 ```
@@ -751,7 +753,9 @@ same:password'
  * @throws TypeError
 */
 let rules = {
-    input : {shouldOld : 18}
+    input : {
+        shouldOld : 18
+    }
 }
 ```
 
@@ -760,9 +764,14 @@ let rules = {
 - Ensures that a date input is before a specified date.
 ```javascript
 let rules = {
-    input : {tilldate:-19},// - for past years, you can pass date instance and also date like this "2023-09-05" in YYYY-DD-MM formate
+    input : {
+        tilldate:-19 // - for past years, you can pass date instance and also date like this "2023-09-05" in YYYY-DD-MM format
 
-    input_two : {tilldate: "2023-09-05"}
+        },
+
+    input_two : {
+        tilldate: "2023-09-05"
+    }
 }
 ```
 
@@ -779,13 +788,13 @@ let rules = {
 ```javascript
 let validate = {
     rules : {
-nput : ['required', 'url'],
-nput2 : ['required', 'url:1']
-    },
+        input : ['required', 'url'],
+        input2 : ['required', 'url:1']
+            },
     errorMsgs : {
-nput2 : {
-   url_ftp : "This field needs to be a valid http or ftp url."
-
+        input2 : {
+            url_ftp : "This field needs to be a valid http or ftp url."
+        }
     }
 }
 
@@ -795,6 +804,7 @@ nput2 : {
 - Validates a zip code.
 
 #### Conditional Rules Explanation
+
 - There are three main conditional rules avaiable [any_of](#any_of), [only_any_of](#only_any_of) and [any_of_rules](#any_of_rules). This rules don't add directly their errors inside errors object they use a conditional error object where they add their errors and based on the rule they add any one message to the `errors` object, You don't need to worry about this if you don't make any conditional rule.
 
 ##### any_of
@@ -813,7 +823,7 @@ let rules = {
     }
 }
 /**
- * Well both of the field has different error if 
+ * Well both of the field has different rules if 
  * input2 is a valid email then input 2 would 
  * not generate any error.
  */
@@ -940,7 +950,7 @@ A validation rule typically consists of a callback function, a rule name, and an
 
 ```javascript
 Validator.extend(
-    function(value, extras, key, extras){
+    function(value, extras, key, addError){
         return extras.includes(value);
     },
     'insideTheList', 
@@ -951,13 +961,13 @@ Validator.extend(
 ```javascript
 let rulesObj = {
     firstRule : {
-        callback : function(value, extra, key){
+        callback : function(value, extra, key, addError){
                 // logic of rule
         },
         errorMessage : "Error message for firstRule"
     },
     secondRule : {
-        callback : function(value, extra, key){
+        callback : function(value, extra, key, addError){
              // logic of rule
         },
         errorMessage : "Error message for secondRule"
@@ -1035,7 +1045,18 @@ Validator.liveVerify(verifierObj);
 
 Validator.verifyData(verifierObj);
 ```
+##### changeCssClasses
 
+- The [showErrors](#showerrors) functions uses two classes one is `is-invalid` on invalid input, second is `invalid-feedback` which would be on the `div` where it shows the error. If you are not using bootstrap and this classes are not defined in your project you can get it form this [stylesheet](https://github.com/Muhthishimiscoding/FormValidatorPlus/blob/main/style.css). If you are using bootstrap classes in your form then you don't need to worry about styling this classes.
+
+- If you have some other classes define in your project for this purpose you can pass those classes name (should be only 2 classes without dots) inside an array.
+
+```javascript
+
+let myClasses = ['invalid-field', 'invalid-msg'];//must be 2 classes in this sequence first for invalid input and second for invalid feedback.
+Valdiator.changeCssClasses(myClasses);
+
+```
 ##### setRegexSpecial 
 
 - Sets the static property of `Validator.REG_SPECIAL` accepts regex as parameter.
@@ -1103,7 +1124,6 @@ Validator.strReplace("This field should contain {min} characters.",  {min: 8});
 // outputs "This field should contain 8 characters."
 
 ```
-
 
 #### Input Modifiers
 
@@ -1290,7 +1310,17 @@ getData(key, all);
 ```
 
 ##### showErrors
-- Show errors on frontend. Accepts an opional parameter which should be the name attribute of your input.
+- Show errors on frontend. Accepts two parameters, name attribute of your input and second rules object.
+```javascript
+/**
+ * @param {string|null} key Name attribute of your input where 
+ * you want to show error. If you want to show error on all inputs then
+ * make it null.
+ * @param {object} rules Rules object
+*/
+```
+**Note**: This function uses two css classes which you can define in your project one is `is-invalid` which is a bootstrap class and it indicates that the field is invalid. The other class which it's add on the error message text `div` is `invalid-feedback`.. You can change the name of this class if you want by using static function [changeCssClasses](#changeCssClasses).
+
 
 ##### baseVerifier
 - Verifies against a single rule.
@@ -1407,6 +1437,6 @@ let obj = {
 }
 SubmitForm.quickSubmit(obj);
 ```
-For more usage usage can find script.js file here in https://github.com/Muhthishimiscoding/FormValidatorPlus/blob/main/script.js.
+For more usage usage can find script.js file [here](https://github.com/Muhthishimiscoding/FormValidatorPlus/blob/main/script.js).
 
-If you like this library please recommend it to fellow devs, and star this repository https://github.com/Muhthishimiscoding/FormValidatorPlus. Thanks for using it.
+If you like this library please recommend it to fellow devs, and star this [repository](https://github.com/Muhthishimiscoding/FormValidatorPlus). Thanks for using it.
