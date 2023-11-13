@@ -30,11 +30,12 @@ var Validator = (function () {
         }
                 //----------------------Default Data Sets------------------------\\
         // Error Message defaults objects
-        static errorMessages = {
+         static errorMessages = {
             alpha: "This field needs to contain only alphabatic characters i.e A to z.",
             alpha_s: "This field can only have only alphabatic characters i.e A to z and space",
             alphaNumeric: "This field can only contain alphanumeric characters.",
             alphaNumeric_s: "Thie fields can only contain alphanumeric characters and space.",
+            barcode:"Please enter a valid barcode (UPC-E, UPC-A, EAN, EAN-14, SSCC).",
             date: 'Please enter a valid date in the format YYYY-MM-DD.',
             dateAll: 'Please enter a valid date',
             dateTime: 'Please enter a valid date and time in the format YYYY-MM-DD HH:MM:SS.',
@@ -52,7 +53,7 @@ var Validator = (function () {
             numb: 'This field should contain only digits.',
             maxnumb: 'This field should not exceed {max} digits.',
             minnumb: 'This field should contain at least {min} digits.',
-            makeInvalidEmpty : "Please make this field empty.",
+            makeInvalidEmpty: "Please make this field empty.",
             tillDate: 'The date of this field should be selected before {tillDate}.',
             shouldOld: 'Age Requirement: You must be at least {shouldOld} years old to access this feature/content.',
             fileSize: 'The maximum allowed file size is {fileSize} and your file size is {fileSize2}.',
@@ -86,9 +87,9 @@ var Validator = (function () {
             json: "The provided JSON structure is not valid.",
             ipv4: "Please enter a valid IPv4 address.",
             ipv6: "Please enter a valid IPv6 address.",
-            isbn: "Please enter a valid ISBN (ISBN-10 or ISBN-13).",
+            isbn10: "Please enter a valid ISBN-10.",
             upca: "Please enter a valid UPC-A (Universal Product Code).",
-            ean13: "Please enter a valid EAN-13 (European Article Number)."
+            ean: "Please enter a valid EAN-10 or EAN-13 (European Article Number).",
         };
         /**
          * Negative checks alpha numeric
@@ -1918,53 +1919,106 @@ var Validator = (function () {
         ipv6(ipAddress) {
             return /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$|^::$|^::1$/.test(ipAddress);
         }
-        /**
-        *@param {string} isbn ISBN Validation (ISBN-10 and ISBN-13)
+      /**
+         * @param {string} isbn10 without check digit
+         */
+      isbnCheckSum(isbn10){
+        let isbnArr = isbn10.split(''), 
+           result;
+        for (let i = 0; i < isbnArr.length; i++) {
+           isbnArr[i] = (10 - i) * isbnArr[i];
+        }
+         result = (11 - (isbnArr.reduce((i,c)=>i+c,0) % 11)) %11;
+         return result < 10 ? result : 'X';
+       }
+       /**
+       * @param {string} isbn ISBN Validation (ISBN-10)
+       */
+       isbn10(isbn) {
+           if(!/^\d{9}[0-9X]$/.test(isbn)){
+               return false;
+           }
+           return this.isbnCheckSum(isbn.slice(0,-1)) == isbn.slice(-1);
+       }
+       calculateChecksum(upc) {
+           let digits = upc.split('').map(Number),
+               checkDigit = digits.pop(),
+               oddSum = digits.filter(
+               (_, index) => index % 2 === 0).reduce(
+                   (sum, digit) => sum + digit, 0),
+                evenSum = digits.filter((_, index) => index % 2 === 1).reduce((sum, digit) => sum + digit, 0);
+           return { checkDigit, oddSum, evenSum };
+       }
+       /**
+        * Validate a barcode UPC-E, UPC-A, EAN, EAN-14, SSCC
+        * @param {string} barcode 
+        * @link https://gist.github.com/spig/897768
+        * @returns {boolean}
         */
-        isbn(isbn) {
-            const isbn10Pattern = /^(?:\d{9}[\dXx]|\d{12})$/;
-            const isbn13Pattern = /^(?:\d{13})$/;
-            return isbn10Pattern.test(isbn) || isbn13Pattern.test(isbn);
-        }
-        calculateChecksum(upc) {
-            const digits = upc.split('').map(Number);
-            const checkDigit = digits.pop();
-            const oddSum = digits.filter(
-                (_, index) => index % 2 === 0).reduce(
-                    (sum, digit) => sum + digit, 0);
-            const evenSum = digits.filter((_, index) => index % 2 === 1).reduce((sum, digit) => sum + digit, 0);
-            return { checkDigit, oddSum, evenSum };
-        }
-
-        /**
+       barcode(barcode) {
+           // check length
+           if (barcode.length < 8 || barcode.length > 18 ||
+               (barcode.length != 8 && barcode.length != 12 &&
+               barcode.length != 13 && barcode.length != 14 &&
+               barcode.length != 18)) {
+             return false;
+           }
+         
+           var lastDigit = Number(barcode.slice(-1));
+           var checkSum = 0;
+           if (isNaN(lastDigit))
+                   return false;  // not a valid upc/ean
+         
+           var arr = barcode.slice(0, -1).split('').reverse();
+           var oddTotal = 0, evenTotal = 0;
+         
+           for (var i=0; i<arr.length; i++) {
+             if (isNaN(arr[i])) { return false; } // can't be a valid upc/ean we're checking for
+         
+             if (i % 2 == 0) { oddTotal += Number(arr[i]) * 3; }
+             else { evenTotal += Number(arr[i]); }
+           }
+           checkSum = (10 - ((evenTotal + oddTotal) % 10)) % 10;
+         
+           // true if they are equal
+           return checkSum == lastDigit;
+         }
+       /**
         * @param {string} upc  
+       */
+       upca(upc) {
+           if(!/^\d+$/.test(upc)){
+               return false;
+           }
+           // Checksum calculation for UPC-A
+           if (upc.length === 12) {
+               let { checkDigit, oddSum, evenSum } = this.calculateChecksum(upc);
+               return (oddSum * 3 + evenSum + checkDigit) % 10 === 0;
+           }
+           return false;
+       }
+       /**
+        * @param {string} ean  without check digit
         */
-        upca(upc) {
-            // Remove any non-numeric characters
-            upc = upc.replace(/\D/g, '');
-            // Checksum calculation for UPC-A
-            if (upc.length === 12) {
-                let { checkDigit, oddSum, evenSum } = this.calculateChecksum(upc);
-                return (oddSum * 3 + evenSum + checkDigit) % 10 === 0;
-            }
-            return false;
-        }
-
-        /**
-        *@param {number} ean European article number 13
-        */
-        ean13(ean) {
-            // Remove any non-numeric characters
-            ean = ean.replace(/\D/g, '');
-            // Calculate checksum for EAN-13
-            if (ean.length === 13) {
-                let { checkDigit, oddSum, evenSum } = this.calculateChecksum(ean);
-                const totalSum = evenSum * 3 + oddSum;
-                return (10 - (totalSum % 10)) % 10 === checkDigit;
-            }
-
-            return false;
-        }
+       eanCheckSum(ean){
+           let sequence = ean.length === 7 ? [3,1] : [1,3], 
+               eanArray = ean.split(''),
+               sum = 0,
+               i=0;
+           for(; i<eanArray.length; i++){
+               sum +=Number(eanArray[i]) * sequence[i%2];
+           }
+           return (10 - (sum % 10)) % 10;
+       }
+       /**
+       *@param {string} ean European article number
+       */
+       ean(ean) {
+           if(!/^(?:\d{8}|\d{13})$/.test(ean)){
+               return false;
+           }
+           return this.eanCheckSum(ean.slice(0,-1)) === Number(ean.slice(-1));
+       }
 
         /**
          * This rule takes any regex and 

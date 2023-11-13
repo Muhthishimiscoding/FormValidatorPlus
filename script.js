@@ -79,13 +79,18 @@ let validate = {
         // password : 'password',
         // conpassword : 'same:password',
         inList: [{
-            inList: ['abc', 'cdf', 'ghj']
+            inList: ['abc', 'cde', 'fgh']
         }],
         n: ['required', {
-            inList: ['abc', 'cdf', 'ghj']
+            inList: ['abc', 'cde', 'fgh']
         }],
         json: 'json:1',
-        upc: 'required|dateTime',
+        ean: 'required|ean',
+        isbn10: 'required|isbn10',
+        barcode: 'required|barcode',
+        upc: 'required|upca',
+        date : 'required|dateAll',
+        sdateTime : 'required|dateTime',
         myRule : 'customRule',
         newRule:'newRule',
         customInput : {
@@ -133,29 +138,29 @@ let validate = {
     // }
 }
 
-// let obj = {
-//     form: form,
-//     validate,
-//     overwrite: "overwritenone",
-//     overwrite: "overwriteFiles",
-//     resetKeys: ['singleFile', 'multipleFiles[]'],
-//     ajaxSettings: {
-//         url: 'http://localhost/layout/index.php',
-//         // dataType: "json",
-//         success: (data) => {
-//             console.log(data);
-//         },
-//         // contentType : false, no need it to set it
-//         // processData: false
-//     },
-// };
-// form.onsubmit = async e => {
-//     e.preventDefault();
-//     let filesObj = await SubmitForm.selectFiles(form);
-//     obj.inputs = [filesObj, { "myinput": "o@gmail.com" }, formdata];
-//     console.log(filesObj);
-//     SubmitForm.justSubmit(obj);
+let obj = {
+    form: form,
+    validate,
+    overwrite: "overwritenone",
+    overwrite: "overwriteFiles",
+    resetKeys: ['singleFile', 'multipleFiles[]'],
+    ajaxSettings: {
+        url: 'http://localhost/layout/index.php',
+        // dataType: "json",
+        success: (data) => {
+            console.log(data);
+        },
+        // contentType : false, no need it to set it
+        // processData: false
+    },
+};
+form.onsubmit = async e => {
+    e.preventDefault();
+    let filesObj = await SubmitForm.selectFiles(form);
+    obj.inputs = [filesObj, { "myinput": "o@gmail.com" }, formdata];
+    console.log(filesObj);
+    SubmitForm.justSubmit(obj);
 
-// }
+}
 
-Validator.liveVerify({ ...validate, callback: null });
+Validator.liveVerify(validate);

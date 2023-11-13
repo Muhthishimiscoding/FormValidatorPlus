@@ -1,9 +1,11 @@
-# FormValidator
+# FormValidatorPlus
 - [Features](#features)
 - [Installation](#Installation)
 - [Usage](#method-providers)
+- [Available Rules](#available-rules)
+- [Customizing Style](#customizing-style)
 
-FormValidator is your all-in-one solution for simplified form management. Whether you're working on a simple contact form or a complex multi-step wizard, FormValidator streamlines form creation, validation, and submission, making your web development tasks more efficient. It offers a wide range of features to enhance your web development experience.
+FormValidatorPlus is your all-in-one solution for simplified form management. Whether you're working on a simple contact form or a complex multi-step wizard, FormValidatorPlus streamlines form creation, validation, and submission, making your web development tasks more efficient. It offers a wide range of features to enhance your web development experience.
 
 **Note**: For form submission it uses jQuery ajax. If you just want to use validator or submitForm then You can use [submitform.js](https://github.com/Muhthishimiscoding/FormValidatorPlus/blob/main/Form%20validator/Separate%20Classes/submitform.js) or its min verion [submitform.min.js](https://github.com/Muhthishimiscoding/FormValidatorPlus/blob/main/minified%20Version/Separate%20Classes/submitform.min.js), [Validator.js](https://github.com/Muhthishimiscoding/FormValidatorPlus/blob/main/Form%20validator/Separate%20Classes/validator.js) or [Validator.min.js](https://github.com/Muhthishimiscoding/FormValidatorPlus/blob/main/minified%20Version/Separate%20Classes/Validator.min.js). Validator.js  also works without jquery.
 
@@ -11,7 +13,7 @@ FormValidator is your all-in-one solution for simplified form management. Whethe
 
 #### Effortless Form Validation
 
-FormValidator makes setting up and managing form validation rules a breeze. It offers a comprehensive set of predefined rules, including basic checks like required fields and valid email addresses, as well as advanced criteria like upc-a, ean-13, conditional validation. Configuring validation rules is intuitive, eliminating the need for complex regular expressions and JavaScript functions.
+FormValidatorPlus makes setting up and managing form validation rules a breeze. It offers a comprehensive set of predefined rules, including basic checks like required fields and valid email addresses, as well as advanced criteria like upc-a, ean-13, conditional validation. Configuring validation rules is intuitive, eliminating the need for complex regular expressions and JavaScript functions.
 
 #### Seamless Integration
 
@@ -19,28 +21,37 @@ It uses jquery. It's designed to be versatile and lightweight, ensuring compatib
 
 #### Customizable Error Messages
 
-User-friendly error messages are crucial for a smooth user experience. FormValidator allows you to define custom error messages for each validation rule, giving you full control over the feedback your users receive.
+User-friendly error messages are crucial for a smooth user experience. FormValidatorPlus allows you to define custom error messages for each validation rule, giving you full control over the feedback your users receive.
 
 #### Effortless Form Submission
 
-FormValidator simplifies form submissions, supporting both traditional and AJAX requests. With just a few lines of code, you can submit form data to your server, handle responses, and display messages to the user. Form submission, file uploads, and response handling have never been easier.
+FormValidatorPlus simplifies form submissions, supporting both traditional and AJAX requests. With just a few lines of code, you can submit form data to your server, handle responses, and display messages to the user. Form submission, file uploads, and response handling have never been easier.
 
 #### Support for Multiple Forms
 
-Managing multiple forms on a single page or within complex wizards is a breeze with FormValidator. The library distinguishes between different forms, ensuring that each form's data is handled independently.
+Managing multiple forms on a single page or within complex wizards is a breeze with FormValidatorPlus. The library distinguishes between different forms, ensuring that each form's data is handled independently.
 
 #### Suitable for All Skill Levels
 
-Whether you're a seasoned developer or just starting out, FormValidator simplifies form-related tasks. Experienced professionals appreciate its flexibility, while beginners find it a valuable tool for honing their skills.
+Whether you're a seasoned developer or just starting out, FormValidatorPlus simplifies form-related tasks. Experienced professionals appreciate its flexibility, while beginners find it a valuable tool for honing their skills.
 
 ## Installation
 
-You can install FormValidator via npm:
+You can install formvValidatorPlus via npm:
 
 ```bash
-npm install formvalidator
+npm install formvalidatorplus
 ```
-or use it from any cdn i.e cdnjs.com, unpkg.com etc.
+or If you are not using npm then can use the min version from [here](https://github.com/Muhthishimiscoding/FormValidatorPlus/blob/main/minified%20Version/formValidator.min.js).
+
+- If you install it through npm then you need to pass jquery as a parameter like this.
+```javascript
+// It returns an array
+const [Validator, SubmitForm] = require('formvalidatorplus')($);
+
+```
+
+**Note**:I want to make it available on cdn libraries provider i.e cdnjs.com as soon as possible for this [my repository](https://github.com/Muhthishimiscoding/FormValidatorPlus) needs more than 100 stars and 500 downloads on npm per month. So if you like it then kindly star this repository. Thanks in advance.
 
 ## Method Providers
 Provides two main classes
@@ -49,7 +60,7 @@ Provides two main classes
 
 ### SubmitForm Class Usage
 
-The formValidator library provides a class called `SubmitForm` with various methods for handling form submissions.
+The FormValidatorPlus library provides a class called `SubmitForm` with various methods for handling form submissions.
 
 #### SubmitForm Available Methods
 
@@ -254,9 +265,9 @@ The second class which this library provides is called as `Validator`. Has many 
 
 #### Static Methods
 This methods are for validation.
+- [liveVerify](#liveVerify)
 - [extend](#add-your-own-rules)
 - [verifydata](#verifydata)
-- [liveVerify](#liveVerify)
 - [changeCssClasses](#changeCssClasses)
 - [setRegexSpecial](#setRegexSpecial)
 - [setImgMimeTypes](#setImgMimeTypes)
@@ -289,6 +300,7 @@ These are input modifiers
 - [accept](#accept)
 - [alpha](#alpha)
 - [alphaNumeric](#alphaNumeric)
+- [barcode](#barcode)
 - [date](#date)
 - [dateAll](#dateAll)
 - [dateTime](#dateTime)
@@ -306,7 +318,7 @@ These are input modifiers
 - [image](#image)
 - [ipv4](#ipv4)
 - [ipv6](#ipv6)
-- [isbn](#isbn)
+- [isbn10](#isbn10)
 - [inList](#inlist)
 - [json](#json)
 - [lowerCase](#lowerCase)
@@ -365,6 +377,9 @@ lpha_s : "Notice here _s when you pass alpha rule with 1 you need to pass it's e
 
 - Validates that a field contains only alphanumeric characters (letters and numbers). It has same configurations as alpha rule (like allowing space).
 
+##### barcode 
+- Validates UPC-E, UPC-A, EAN, EAN-14 and SSCC. Also see [ean13](#ean13), [upca](#upca) and [isbn10](#isbn10)
+
 ##### date
 
 - Validates that a date field is in the format YYYY-MM-DD.
@@ -390,7 +405,7 @@ let rules = {
 
 ##### dateTime
 
-- Validates that a date and time field is in the format YYYY-MM-DD HH:MM:SS.
+- Validates that a date and time field is in the format YYYY-MM-DD HH:MM:SS. You shouldn't use this rule on `input[type='dateTime']` or `input[type='dateTime-local']`.It is for `input[type='text']`.
 
 ##### dimension 
 - Validates the dimension for images. This rule accepts an object which can have following keys:
@@ -505,8 +520,8 @@ let rules = {
 ##### detectMultipleSpaces 
 - This would detect multiple spaces inside an input.
 
-##### ean
-- Validates the ean-13 number (European Article Number) .
+##### ean13
+- Validates the ean-13 number (European Article Number). Also see [barcode](#barcode) and [upca](#upca).
 
 ##### email
 
@@ -573,11 +588,8 @@ let rules = {
 ##### ipv6
 - The field under validation needs to be a valid ipv6 address.
 
-##### isbn
-- The field under validation needs to be a valid isbn.
-
-##### isbn 
-- Basic validation for the format of isbn number.
+##### isbn10 
+- Validates isbn10 number.
 
 ##### inList 
 - The value must be of any of the array for the rule.
@@ -993,11 +1005,11 @@ Validator.extend(rulesObj);
 * then it must should accept two parameters an error object where key would be name of 
 * your invalid input field and it's value would be error messages.
 * The second parameter would be all rules.
-* @param {Validator|null} [formValidator = null] You can also pass Validator class instance if
+* @param {Validator|null} [validator = null] You can also pass Validator class instance if
 * it contains rules, error Msgs and data to validate.
 */
 //SubmitForm class use this function to validate data
-await Validator.verifyData(obj, formValidator = null)
+await Validator.verifyData(obj, validator = null)
 
 ```
 
@@ -1047,9 +1059,9 @@ Validator.verifyData(verifierObj);
 ```
 ##### changeCssClasses
 
-- The [showErrors](#showerrors) functions uses two classes one is `is-invalid` on invalid input, second is `invalid-feedback` which would be on the `div` where it shows the error. If you are not using bootstrap and this classes are not defined in your project you can get it form this [stylesheet](https://github.com/Muhthishimiscoding/FormValidatorPlus/blob/main/style.css). If you are using bootstrap classes in your form then you don't need to worry about styling this classes.
+- The [showErrors](#showerrors) functions uses two classes one is `is-invalid` (makes invalid field border red) on invalid input, second is `invalid-feedback` which would be on the `div` where it shows the error. If you are not using bootstrap and this classes are not defined in your project, you can get it form this [stylesheet](https://github.com/Muhthishimiscoding/FormValidatorPlus/blob/main/style.css). If you are using bootstrap classes in your form then you don't need to worry about styling this classes.
 
-- If you have some other classes define in your project for this purpose you can pass those classes name (should be only 2 classes without dots) inside an array.
+**Note**: If you have some other classes define in your project for this purpose you can pass those classes name (should be only 2 classes without dots) inside an array.
 
 ```javascript
 
@@ -1319,7 +1331,7 @@ getData(key, all);
  * @param {object} rules Rules object
 */
 ```
-**Note**: This function uses two css classes which you can define in your project one is `is-invalid` which is a bootstrap class and it indicates that the field is invalid. The other class which it's add on the error message text `div` is `invalid-feedback`.. You can change the name of this class if you want by using static function [changeCssClasses](#changeCssClasses).
+**Note**: This function uses two css classes which you can define in your project one is `is-invalid` which is a bootstrap class and it indicates that the field is invalid. The other class which it's add on the error message text `div` is `invalid-feedback`.. You can change the name of this class if you want by using static function [changeCssClasses](#changeCssClasses). If you aren't using bootstrap and these classes are not define in your project you can get them from this [stylesheet](https://github.com/Muhthishimiscoding/FormValidatorPlus/blob/main/style.css).
 
 
 ##### baseVerifier
@@ -1437,6 +1449,12 @@ let obj = {
 }
 SubmitForm.quickSubmit(obj);
 ```
+
+## Customizing Style
+
+If you don't have these css classes define like `is-invalid`, `invalid-feedback` and `form-control`, you can use use this [stylesheet](https://github.com/Muhthishimiscoding/FormValidatorPlus/blob/main/style.css). Also see [changeCssClasses](#changecssclasses) and [showErrors](#showerrors).
+
+
 For more usage usage can find script.js file [here](https://github.com/Muhthishimiscoding/FormValidatorPlus/blob/main/script.js).
 
 If you like this library please recommend it to fellow devs, and star this [repository](https://github.com/Muhthishimiscoding/FormValidatorPlus). Thanks for using it.

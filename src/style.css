@@ -1,11 +1,13 @@
 /**
 * This are some bootstrap classes so if you are 
-* not using bootstap you can use these classes 
+* not using bootstap you can use these classes .
 * rememeber that your every input should have a 
-* form control class (if you are styling your own classes then form control is not needed).
+* form control class 
+* (if you are styling your own classes then form control is not needed).
 * Note: it is not neccessary to use all this classes 
 * and css u can create your own classess 
 * for more details visit 
+* https://github.com/Muhthishimiscoding/FormValidatorPlus#changeCssClasses
 */
 
 .form-control:focus{
@@ -47,9 +49,8 @@
 .invalid-feedback{
     margin-top: 12px !important;
     width: 100%;
-    margin-top: 0.25rem;
     font-size: 17px;
-    font-weight: 510;
+    font-weight: 500;
     color: #dc3848
 }
 @media(max-width:700px){
