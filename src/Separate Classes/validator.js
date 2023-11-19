@@ -3,7 +3,7 @@
  * @description It is a vanilla javascript Validator of FormValidator.
  * It doesn't submit forms, it validates form, for more details visit.
  * If you just want to validate form and want to submit it with your own
- * code You can use it, otherwise FormValidator recommended 
+ * code You can use it, otherwise FormValidator is recommended 
  * https://github.com/Muhthishimiscoding/FormValidatorPlus.
  * @version 1.0.0
  * @author Muhthishim Malik 

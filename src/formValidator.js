@@ -12,7 +12,6 @@ var [Validator, SubmitForm] = (function () {
     'use strict';
     if (typeof $ !== 'function')
         throw new Error("FormValidatorPlus works with jquery");
-
     class Validator {
         //----------------------Default Data Sets------------------------\\
         // Error Message defaults objects
@@ -2251,7 +2250,7 @@ var [Validator, SubmitForm] = (function () {
             return dataObj;
         }
 
-        static quickSumbit(obj) {
+        static quickSubmit(obj) {
             let form = SubmitForm.selectElem(obj.form);
             form.onsubmit = async e => {
                 e.preventDefault();
@@ -2566,7 +2565,6 @@ var [Validator, SubmitForm] = (function () {
         }
 
     }
-
     return [Validator, SubmitForm];
-
 })();
+

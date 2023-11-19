@@ -213,7 +213,7 @@ SubmitForm.quickSubmit(settings);
 ```
 
 ##### justSubmit
-Same as quickSumbmit accepts only one parameter of [configuration objects](#configuration-object).
+Same as quickSubmit accepts only one parameter of [configuration objects](#configuration-object).
 
 ##### SelectFiles
 ```javascript 

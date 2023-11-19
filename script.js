@@ -7,7 +7,7 @@ let formdata = new FormData();
 
 Validator.setMaxdate('#date', 18);
 
-Validator.setPhone('[name="numb"]', true);
+Validator.setPhone('[name="phone"]', true);
 
 formdata.append('myformdatakey', 'myformdatavalue');
 
@@ -53,6 +53,7 @@ let validate = {
                     "min:9"
                 ]
             }],
+        phone : 'required',
         numb: [
             {
                 range: [4, 9]

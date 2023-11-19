@@ -239,7 +239,7 @@ var SubmitForm = (function () {
             return dataObj;
         }
 
-        static quickSumbit(obj) {
+        static quickSubmit(obj) {
             let form = SubmitForm.selectElem(obj.form);
             form.onsubmit = async e => {
                 e.preventDefault();
