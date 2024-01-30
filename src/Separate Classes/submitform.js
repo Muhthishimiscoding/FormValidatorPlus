@@ -7,7 +7,12 @@
  * @link https://github.com/Muhthishimiscoding
  * @license MIT
  */
-var SubmitForm = (function () {
+(function(e){
+    if(typeof module === 'object') module.exports = e;
+    else{
+         window.SubmitForm = e(jQuery);
+    }
+})(function ($) {
     'use strict';
    return class SubmitForm {
         /**
@@ -555,4 +560,4 @@ var SubmitForm = (function () {
         }
 
     }
-})();
+});

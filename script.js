@@ -9,6 +9,9 @@ Validator.setMaxdate('#date', 18);
 
 Validator.setPhone('[name="phone"]', true);
 
+
+Validator.setMaxdate('[name="sO"]', 18);
+
 formdata.append('myformdatakey', 'myformdatavalue');
 
 formdata.append('myformdatakey', 'This is a dublicate of all myformdatakey');
@@ -35,7 +38,10 @@ let validate = {
         myinput: 'required|min:6|max:12|email',
         textarea: { min: 19 },
         checkbox: 'accept',
-        dateTime: ['date', { tillDate: -19 }],
+        dateTime: [
+            'date', 
+            { tillDate: -19 }
+        ],
         singleFile: ['required',
             { fileSize: (1024 * 1024) * 3 },//5mb (1024*1024)*5
             {
@@ -96,13 +102,23 @@ let validate = {
         newRule:'newRule',
         customInput : {
             notRule : ['zipCode','min:9']
-        }
+        },
+        t:{tillDate:1},
+        sO:{
+            shouldOld:18
+        },//can do it like this too "shoulOld:18"
+
+        customDate: [
+            'date',
+            {tillDate:1}
+        ],
+        customDate1:"dateTime|shouldOld:18"
+        // {shouldOld:18}
     },
 
     errorMsgs: {
         myinput: {
             required: "This is a custom message for required field",
-
         },
         singleFile: {
             fileSize: "The file size exceeds max file size which is 3mb."

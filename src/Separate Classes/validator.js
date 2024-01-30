@@ -1,17 +1,20 @@
 /**
  * @name Validator
  * @description It is a vanilla javascript Validator of FormValidator.
- * It doesn't submit forms, it validates form, for more details visit.
- * If you just want to validate form and want to submit it with your own
- * code You can use it, otherwise FormValidator is recommended 
+ * It doesn't submit forms, it validates form, for more details visit,
  * https://github.com/Muhthishimiscoding/FormValidatorPlus.
+ * If you just want to validate form and want to submit it with your own
+ * code You can use it, otherwise FormValidatorPlus is recommended 
  * @version 1.0.0
  * @author Muhthishim Malik 
  * @link https://github.com/Muhthishimiscoding
  * @license MIT
  */
 
-var Validator = (function () {
+(function(e){
+    if(typeof module === 'object') module.exports = e();//directly exporting Validator class
+    else window.Validator = e();
+})(function() {
     'use strict';
     return class Validator{
         /**
@@ -254,6 +257,7 @@ var Validator = (function () {
              * Conditional errors
              */
             this.conerrors = {};
+            this.dateFormat = {};
       }
         /**
          * Register a New Conditional Errors object with the given inputName and ruleName
@@ -308,36 +312,26 @@ var Validator = (function () {
         }
 
         //-------------------------------DATE RESOLVERS------------------------------\\
+
         /**
-         * Gives a utc date for a normal date
-         * @param {Date | null} date 
-         */
-        static getUtcDate(date = null) {
-            if (!date) date = new Date();
-            const now_utc = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(),
-                date.getUTCDate(), date.getUTCHours(),
-                date.getUTCMinutes(), date.getUTCSeconds());
-            return new Date(now_utc);
-        }
-        /**
-         * Resolve howManyYears and give a utc calculated date 
+         * Resolve howManyYears and gives a calculated date 
          * @param {Number | Date | String | null} howManyYears 
          * @returns {Date}
          */
         static getDate(howManyYears) {
             let pastDate;
             if (typeof howManyYears === 'number') {
-                pastDate = Validator.getUtcDate();
-                pastDate.setUTCFullYear(pastDate.getUTCFullYear() - howManyYears);
-                pastDate.setUTCHours(0, 0, 0, 0);
+                pastDate = new Date();
+                pastDate.setFullYear(pastDate.getFullYear() - howManyYears);
+                pastDate.setHours(0, 0, 0, 0);
             } else if (typeof howManyYears === 'string') {
                 pastDate = new Date(howManyYears);
-                pastDate = Validator.getUtcDate(pastDate);
+                console.log("here", pastDate);
             } else if (howManyYears instanceof Date) {
                 pastDate = howManyYears;
             } else {
                 //pass current date
-                pastDate = Validator.getUtcDate();
+                pastDate = new Date();
             }
             return pastDate;
         }
@@ -350,8 +344,13 @@ var Validator = (function () {
          */
         static setMaxdate(selector, toDate = null) {
             let input = Validator.selectElem(selector, HTMLInputElement);
-            let max = Validator.getDate(toDate);
-            input.max = max.toISOString().split('T')[0];
+            let max = Validator.getDate(toDate).toISOString();
+                
+            if(input.getAttribute('type') ==='date'){
+                input.max = max.split('T')[0];
+            }else{
+                input.max = max.slice(0, max.lastIndexOf(':'));
+            }
         }
         /**
          * Set the field a valid number 
@@ -417,8 +416,8 @@ var Validator = (function () {
                 "May", "June", "July", "August",
                 "September", "October", "November", "December"
             ];
-            let hours = date.getUTCHours(),
-                minutes = date.getUTCMinutes(),
+            let hours = date.getHours(),
+                minutes = date.getMinutes(),
                 ampm = hours >= 12 ? 'pm' : 'am';
 
             // Convert hours to 12-hour format
@@ -427,7 +426,7 @@ var Validator = (function () {
 
             // Add leading zeros to minutes if needed
             minutes = minutes < 10 ? '0' + minutes : minutes;
-            const formattedDateTime = `${date.getUTCDate()} ${months[date.getUTCMonth()]},${date.getUTCFullYear()} till ${hours}:${minutes} ${ampm}`;
+            const formattedDateTime = `${date.getDate()} ${months[date.getMonth()]},${date.getFullYear()} till ${hours}:${minutes} ${ampm}`;
             return formattedDateTime;
         }
         /**
@@ -498,8 +497,9 @@ var Validator = (function () {
             for (const key in verify.rules) {
 
                 if (verify.rules.hasOwnProperty(key)) {
-                    let input = document.querySelector(`[name="${key}"]`),
-                        rule = verify.resolveRule(verify.rules[key]),
+                    let input = document.querySelector(`[name="${key}"]`);
+                    if(!input) continue;
+                    let rule = verify.resolveRule(verify.rules[key]),
                         bool = rule.includes('required'),
                         i = verify.runConrules(key, rule, conThrottle, callback);
                         if(i > -1){
@@ -635,7 +635,7 @@ var Validator = (function () {
                         resolvedRules[skey] = this.resolveRule(rule[skey]);
                         let e = document.querySelector(`[name="${skey}"]`);
 
-                        e.addEventListener('input', () => callBack(skey, resolvedRules, key, r, ruleObj, callBack1, bool));
+                        e?.addEventListener('input', () => callBack(skey, resolvedRules, key, r, ruleObj, callBack1, bool));
                     }
                 
             }
@@ -820,7 +820,7 @@ var Validator = (function () {
                         msg = this.formatDateTimeWithAMPM(Validator.getDate(extras));
                         break;
                     case 'shouldOld':
-                        if (extras instanceof Date) msg = extras.getUTCFullYear();
+                        if (extras instanceof Date) msg = extras.getFullYear();
                         break;
                     case 'image':
                     case 'fileType':
@@ -1477,35 +1477,40 @@ var Validator = (function () {
         /**
          * Age reuirement rule that user should be x years old to
          * access this
-         * @param {String} value Compare dates by first converting a local date into utc date
+         * @param {String} value Compare dates by first converting a local date into date
          * @param {Number} howManyYears 
          * @returns {boolean}
          * @throws TypeError
          */
-        shouldOld(value, howManyYears) {
+        shouldOld(value, howManyYears, key) {
             howManyYears = this.checkNumber(howManyYears, 'shouldrule');
-            let dob = new Date(value);
-            dob = Validator.getUtcDate(dob);
-            let currentDate = Validator.getUtcDate();
-            let userage = currentDate.getUTCFullYear() - dob.getUTCFullYear();
-            return userage < howManyYears;
-
+            let dob = this.getFormatedDate(value, key);
+            let currentDate = new Date();
+            let difference = currentDate.getFullYear() - dob.getFullYear();
+            if(difference === howManyYears){
+                if(dob.getMonth() == currentDate.getMonth()) 
+                    return dob.getDate() <= currentDate.getDate();
+                else if(dob.getMonth() < currentDate.getMonth()) return true;
+                return false;
+            }
+            return difference >= howManyYears;
         }
         /**
          * Rules for future date and
          * can be applicable to past date with a negative sign
          * @param {string} value 
          */
-        tillDate(value, futureDate) {
+        tillDate(value, futureDate, key) {
             /**
              * For future date we need to use 
+             * in inner syntax
              * - sign before year
              */
             if (typeof futureDate === 'number')
                 futureDate = -futureDate;
 
             futureDate = Validator.getDate(futureDate);
-            let inputDate = Validator.getUtcDate(new Date(value));
+            let inputDate = this.getFormatedDate(value, key);
             /**
              * If user date is more then future date then return 
              * false
@@ -1523,8 +1528,8 @@ var Validator = (function () {
          * 5) YYYY-MM-DD
          * 
          */
-        dateAll(value) {
-            return this.date(value) || this.date(value, "YYYY/DD/MM") || this.date(value, "MM/DD/YYYY") || this.date(value, "DD/MM/YYYY") || this.date(value, "YYYY-MM-DD");
+        dateAll(value, extra, key) {
+            return this.date(value, "YYYY-DD-MM", key) || this.date(value, "YYYY/DD/MM", key) || this.date(value, "MM/DD/YYYY", key) || this.date(value, "DD/MM/YYYY", key) || this.date(value, "YYYY-MM-DD", key);
         }
         /**
          * Validate a date 
@@ -1536,16 +1541,18 @@ var Validator = (function () {
          * 4) DD/MM/YYYY
          * 5) YYYY-MM-DD
          */
-        date(value, extra) {
+        date(value, extra, key) {
             let format = "YYYY-DD-MM";
             if (extra) format = extra
             /**
              * The default format is YYYY-DD-MM
-             * @var monthIndex When we split the date string into an array then to support
+             * @var monthIndex When we split the
+             * date string into an array then to support
              * different formats like YYYY-DD-MM we need to track the
-             * index of month, day and year i.e here month is at 2 index 
-             * where as in MM/DD/YYYY month is at 0 index. Same goes for 
-             * dayIndex and yearIndex.
+             * index of month, day and year i.e here month is
+             * at 2 index 
+             * where as in MM/DD/YYYY month is at 0 index. Same 
+             * goes for dayIndex and yearIndex.
              */
             let regex = /^\d{4}-\d{1,2}-\d{1,2}$/,
                 monthIndex = 2,
@@ -1608,31 +1615,50 @@ var Validator = (function () {
             // Check for leap years.
             if ((year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0))
                 months[1] = 29;
-
             // Check the range of the day
-            return day <= months[month - 1];
+            if(day <= months[month - 1]){
+                this.dateFormat[key] = [year, month, day];//1year, 2month, 3 day
+                return true;
+            }
         };
         /**
-         * Validate a date time
-         * format. 
-         * @param {String} value in YYYY-MM-DD HH:MM:SS format
-         */
-        dateTime(value, format) {
+             * Validate a date time
+             * format. 
+             * @param {String} value in YYYY-MM-DD HH:MM:SS format
+             */
+        dateTime(value, format, key) {
             let val = value.split(" ");
             let bool;
             if (!format) {
-                bool = this.dateAll(val?.[0]);
+                bool = this.dateAll(val?.[0], null, key);
             } else {
-                bool = this.date(val?.[0], format);
+                bool = this.date(val?.[0], format, key);
             }
             if (bool) {
                 let a = val?.[1]?.split(':')?.map(Number);
                 if (a?.length !== 3 || a[0] > 23 || a[0] < 0 || a[1] > 59 || a[1] < 0 || a[2] > 59 || a[2] < 0) {
                     return false;
                 }
-                return /^\d{1,2}:\d{1,2}:\d{1,2}$/.test(val?.[1]);
+                if(/^\d{1,2}:\d{1,2}:\d{1,2}$/.test(val?.[1])){
+                    this.dateFormat[key].push(...a);
+                    return true;
+                }
+                // return /^\d{1,2}:\d{1,2}:\d{1,2}$/.test(val?.[1]);
             }
-            return bool;
+            return false;
+        }
+        getFormatedDate(value, key){
+            if(this.dateFormat[key]){
+                let dateArray = [...this.dateFormat[key]];
+                dateArray[1]--; 
+                let i = value.indexOf('T');
+                if(i > -1){
+                    let b = value.slice(i+1).split(':').map(Number);
+                    dateArray.push(...b);
+                }
+                return new Date(...dateArray);
+            }
+            return new Date(value);
         }
         //---------------------RULES FOR FILES-----------------------\\
         /**
@@ -2040,4 +2066,4 @@ var Validator = (function () {
             return !regex.test(value);
         }
     }
-})();
+})

@@ -1,4 +1,5 @@
 # FormValidatorPlus
+Current vesion is 1.0.5
 - [Features](#features)
 - [Installation](#Installation)
 - [Usage](#method-providers)
@@ -8,7 +9,7 @@
 FormValidatorPlus is your all-in-one solution for simplified form management. Whether you're working on a simple contact form or a complex multi-step wizard, FormValidatorPlus streamlines form creation, validation, and submission, making your web development tasks more efficient. It offers a wide range of features to enhance your web development experience.
 
 **Note**: For form submission it uses jQuery ajax. If you just want to use validator or submitForm then You can use [submitform.js](https://github.com/Muhthishimiscoding/FormValidatorPlus/blob/main/Form%20validator/Separate%20Classes/submitform.js) or its min verion [submitform.min.js](https://github.com/Muhthishimiscoding/FormValidatorPlus/blob/main/minified%20Version/Separate%20Classes/submitform.min.js), [Validator.js](https://github.com/Muhthishimiscoding/FormValidatorPlus/blob/main/Form%20validator/Separate%20Classes/validator.js) or [Validator.min.js](https://github.com/Muhthishimiscoding/FormValidatorPlus/blob/main/minified%20Version/Separate%20Classes/Validator.min.js). Validator.js  also works without jquery.
-
+- One important point is that You should pass utc date and time for rules which works with date and time like [tillDate](#tilldate) and [shouldOld](#shouldold). For more at this point see here [date rules use](#date-rules-usage).
 ## Features
 
 #### Effortless Form Validation
@@ -68,7 +69,6 @@ The FormValidatorPlus library provides a class called `SubmitForm` with various 
 - [justSubmit](#justSubmit)
 - [SelectFiles](#SelectFiles)
 - [readBlobAsBase64](#readBlobAsBase64)
-- [selectElem](#SelectElem)
 
 ##### quickSubmit
 
@@ -247,6 +247,8 @@ If you pass fileTobase64 as true It would return an object check [readBlobAsBase
     let base64obj = await SubmitForm.readBlobAsBase64(input.files[0]);
 ```
 
+- Well this method is not important for extrnal use but still come handy in some cases.
+- [selectElem](#SelectElem)
 ##### selectElem
 ```javascript
  /**
@@ -265,16 +267,11 @@ The second class which this library provides is called as `Validator`. Has many 
 
 #### Static Methods
 This methods are for validation.
+- [verifydata](#verifydata)
 - [liveVerify](#liveVerify)
 - [extend](#add-your-own-rules)
-- [verifydata](#verifydata)
-- [changeCssClasses](#changeCssClasses)
 - [setRegexSpecial](#setRegexSpecial)
 - [setImgMimeTypes](#setImgMimeTypes)
-- [getUtcDate](#getUtcDate)
-- [getDate](#getDate)
-- [getfileSize](#getfileSize)
-- [strReplace](#strReplace)
 
 These are input modifiers
 
@@ -293,7 +290,7 @@ These are input modifiers
 - [baseVerifier](#baseVerifier)
 - [getUserError](#getUserError)
 - [getError](#getError)
-- [isFailed](#isFailed)
+- [isValid](#isValid)
 
 #### Available Rules
 
@@ -382,7 +379,7 @@ lpha_s : "Notice here _s when you pass alpha rule with 1 you need to pass it's e
 
 ##### date
 
-- Validates that a date field is in the format YYYY-MM-DD.
+- Validates that a date field is in the format YYYY-MM-DD, also see [shouldOld](#shouldOld), [tillDate](#tilldate).
 ```javascript
 /**
 * Validate a date 
@@ -759,10 +756,7 @@ let rules = {
 /**
  * Age reuirement rule that user should be x years old to
  * access this feature/content
- * @param {String} value Compare dates by first converting a local date into utc date
  * @param {Number} howManyYears 
- * @returns {boolean}
- * @throws TypeError
 */
 let rules = {
     input : {
@@ -773,16 +767,15 @@ let rules = {
 
 ##### tillDate
 
-- Ensures that a date input is before a specified date.
+- Ensures that a date input is before a specified date. Look at the detailed [guide on passing date](#date-rules-usage).
 ```javascript
 let rules = {
     input : {
-        tilldate:-19 // - for past years, you can pass date instance and also date like this "2023-09-05" in YYYY-DD-MM format
+        tilldate: -1,//- sign for indicating past years
 
         },
-
     input_two : {
-        tilldate: "2023-09-05"
+        tilldate: "2023-09-05T09:09"//for local websites it is alright but for international usage look at the detailed usage.
     }
 }
 ```
@@ -1015,59 +1008,73 @@ await Validator.verifyData(obj, validator = null)
 
 ##### liveVerify
 
-- This static method enables live error checking and shows error to users on input, focus and blur events.
+- This static method enables live error checking and shows error to users on input, focus and blur events. It excepts an opetional callback which will be fired on these events to show user error. If no callback is provided it uses it's default `showErrors` function.
 
 ```javascript 
  /**
    * Set up live form validation based on provided 
    * rules and custom error messages.
-   * @param {object} obj maybe just rules or an obect containing rules and 
-   * errorMsgs 
-   * @property {object} rules - Rules for validation.
-   * @property {object|undefined} [errorMsgs=undefined] - Custom error messages
-   * for validation rules.
-   * @property {function|null} [callback=null] - Callback function to 
-   * execute on validation errors. Default is null if you don't provide any
-   * function it would use showErrors function. If you provide a function 
-   * liveverifier would pass 
-   * 4 parameters inside your callback
-   * i) First would be key which is name of the current input you 
-   * pass inside rule 
-   * ii) Second would be errors object
-   * which would contain errors for all inputs.
-   * iii) Third would be rules.
-   * iv) verifier instance
-   * @throws {TypeError} - If callBack is not a function.
 */
 let verifierObj = {
     rules : {
-input : "required|min:6|max:200"
+        input : "required|min:6|max:200"
     },
     errorMsgs : {
-input : {
-      required : "This input is required so please pass a value inside it."
-}
+        input : {
+            required : "This input is required so please pass a value inside it."
+        }
     },
+            /*
+             * Callback function to 
+             * execute on validation errors. Default is null if you don't provide any
+             * function it would use showErrors function. If you provide a function 
+             * liveverifier would pass 3 parameters inside your callback
+             * i) First would be key which is name of the current input you  pass inside rule. 
+             * For conditional rules key would be null and instead it would give an error 
+             * object so your function should handle that condition deifferently
+             * ii) Second would be errors object
+             * which would contain errors for all inputs.
+             * iii) Third would be rules itself well it looks
+             * like why to pass rules when I gave it? well, 
+             * rules would help you to verify that 
+             * a particular input name is in rules object
+             * but errors object doesn't have it's name
+             * so you can understand that it is a valid 
+             * field.
+             */
     callback : function(key, errorObj, rules){
-console.log(key, errorObj, rules);
+            if (key){
+                if(this.errorObj.hasOwnProperty(key)){
+                    console.log(`${key} is invalid and has a ${this.errorObj[key]} error`);
+                }else{
+                    console.log(`${key} is valid.`);
+                }
+            }
+                else {
+                    for (const input in errorObj) {
+                        console.log(`${input} is a conditional input an has a ${errorObj[input]} error.`);
+                    }
+                }
+                console.log(key, errorObj, rules);
+            }
     }
 }
 //Hint: Verifydata and liveVerifier both accepts same object 
 Validator.liveVerify(verifierObj);
 
 Validator.verifyData(verifierObj);
-```
-##### changeCssClasses
 
-- The [showErrors](#showerrors) functions uses two classes one is `is-invalid` (makes invalid field border red) on invalid input, second is `invalid-feedback` which would be on the `div` where it shows the error. If you are not using bootstrap and this classes are not defined in your project, you can get it form this [stylesheet](https://github.com/Muhthishimiscoding/FormValidatorPlus/blob/main/style.css). If you are using bootstrap classes in your form then you don't need to worry about styling this classes.
+/**
+ * WIthout passing errorMsgs and callback. It works too.
+ * */
+let anotherVerifyObj = {
+    input:"required|min:9",
+    input2:"isbn10"
+};
 
-**Note**: If you have some other classes define in your project for this purpose you can pass those classes name (should be only 2 classes without dots) inside an array.
+Validator.liveVerify(anotherVerifyObj);
 
-```javascript
-
-let myClasses = ['invalid-field', 'invalid-msg'];//must be 2 classes in this sequence first for invalid input and second for invalid feedback.
-Valdiator.changeCssClasses(myClasses);
-
+Validator.verifyData(anotherVerifyObj);
 ```
 ##### setRegexSpecial 
 
@@ -1076,66 +1083,6 @@ Valdiator.changeCssClasses(myClasses);
 ##### setImgMimeTypes 
 
 - Sets the static property of `Validator.imgMimeTypes` accepts regex as parameter.
-
-##### getUtcDate
-- Gives utc date for a normal date.
-```javascript
-/**
-* Gives a utc date for a normal date
-* @param {Date | null} date 
-*/
-Validator.getUtcDate(new Date('2023-09-09'));
-```
-
-##### getDate
-
-- If you pass a number like 5 it would give a future date of 5 years form a current date and month and if you pass -5 then it would give a past date.
-
-```javascript
-/**
- * Resolve howManyYears and give a utc calculated date 
- * @param {Number | Date | String | null} howManyYears 
- * @returns {Date}
- */
-Validator.getDate(12);
-```
-
-##### getfileSize
-- Get file size in human readable format.
-```javascript
-/**
- * @param {Number} size in bytes
- * @retruns {string}
-*/
-Validator.getfileSize(1024*1024*3);//outputs 3mb
-```
-
-##### strReplace 
-```javascript
- /**
-* A string replacer for adding errors
-* @param {string} str 
-* @param {object} replaceMents key should be placeholder/search Value and
-* value should be replacing string
-* @param {boolean} [curlyBraces=true] if you pass a placeholder
-* in error message like this {min} then in replacements you just 
-* need to pass min it would automatically make it {min}
-* if it false then it won't do this. So curlyBraces means true
-* means to add the curly braces around your placeholder like
-* you have an error message like this
-* max : "This field should contain {max} characters."
-* So here max is inside curlybraces {}.
-* to replace this with help of this function 
-* you can easily pass it like this
-* Validator.strReplace(Validator.errorMessages['max'], {max : 90})
-* no need to pass like this {['{max}'] : 90}
-* @returns {string}
-*/
-
-Validator.strReplace("This field should contain {min} characters.",  {min: 8});
-// outputs "This field should contain 8 characters."
-
-```
 
 #### Input Modifiers
 
@@ -1149,7 +1096,7 @@ Validator.strReplace("This field should contain {min} characters.",  {min: 8});
 * @param {string|HTMLInputElement} selector 
 * @param {null|Date|Number} [toDate=null] In number case it should be years count 
 */
-Validator.setMaxdate(".data-input", 9);//sets the date for 9 years
+Validator.setMaxdate(".data-input", 9);//sets the date for future 9 years from today
 ```
 
 ##### 
@@ -1227,6 +1174,43 @@ Validator.setNum(".numb-input", 90);
        }
      }
      ```
+
+###### Date rules usage
+
+If your website is being used internationally it is always a better choice to use `UTC` time. To align with this, our library encourages you to pass date as utc date. 
+```javascript
+let d = new Date("2023-09-08T09:09");
+let timeStampInSeconds;
+let rules = {
+    date_input1:{ 
+        tillDate: d.toISOString()
+        },
+    date_input2 : "2023-09-08",//This is alright too It will automatically reset time to 0 hour 
+    date_input3: {
+        tillDate:""+timeStampInSeconds  //Casting seconds in string because otherwise validater would try to understand this as year.
+        },
+    date_input4: {tillDate: 1}, //for future 1 year
+    date_input5: {tillDate:-1},//for past 1 year
+    date_input6:{shouldOld:18}//user should be 18 years old to access this feature
+    },
+
+}
+```
+- **Note**: One important point is that if you are using date formating validating rules like [date](#date), [dateAll](#dateall) and [dateTime](#datetime) then always place those rules first because they will automatically take care of the date format from inputs.
+
+```javascript
+let rules = {
+    input1: {
+        date:"YYYY/MM/DD",
+        tillDate:1,
+        },
+    input2 : {
+        date:"YYYY-DD-MM",
+        shouldOld:18
+    }
+}
+```
+
 
 ###### Error Messages
 
@@ -1367,7 +1351,7 @@ getUserError(key, ruleName);
 getError(input_name_attr, ruleName, defaultMessage = "An unknown error occured.");
 ```
 
-##### isFailed
+##### isValid
 - Retruns true when validation passes otherwise return false.
 
 #### Usage
@@ -1384,7 +1368,7 @@ getError(input_name_attr, ruleName, defaultMessage = "An unknown error occured."
                     }
                 ],
         checkbox : 'accept',
-        dateTime : ['date', {tillDate : -19}],
+        dateTime : ['date', {tillDate : -19}],//Past 19 years
         singleFile :[
                         Validator.RULE_REQUIRED,// 'required'
                         {
@@ -1449,6 +1433,78 @@ let obj = {
 }
 SubmitForm.quickSubmit(obj);
 ```
+
+#### Genral Helper functions
+
+This methods well not that important for external use but still come handy in certain situtations. These are all static methods of `Validator`.
+- [changeCssClasses](#changeCssClasses)
+- [getDate](#getDate)
+- [getfileSize](#getfileSize)
+- [strReplace](#strReplace)
+
+##### changeCssClasses
+
+- The [showErrors](#showerrors) functions uses two classes one is `is-invalid` (makes invalid field border red) on invalid input, second is `invalid-feedback` which would be on the `div` where it shows the error. If you are not using bootstrap and this classes are not defined in your project, you can get it form this [stylesheet](https://github.com/Muhthishimiscoding/FormValidatorPlus/blob/main/style.css). If you are using bootstrap classes in your form then you don't need to worry about styling this classes.
+
+**Note**: If you have some other classes define in your project for this purpose you can pass those classes name (should be only 2 classes without dots) inside an array.
+
+```javascript
+
+let myClasses = ['invalid-field', 'invalid-msg'];//must be 2 classes in this sequence first for invalid input and second for invalid feedback.
+Valdiator.changeCssClasses(myClasses);
+
+```
+
+##### getfileSize
+- Get file size in human readable format.
+```javascript
+/**
+ * @param {Number} size in bytes
+ * @retruns {string}
+*/
+Validator.getfileSize(1024*1024*3);//outputs 3mb
+```
+
+##### strReplace 
+```javascript
+ /**
+* A string replacer for adding errors
+* @param {string} str 
+* @param {object} replaceMents key should be placeholder/search Value and
+* value should be replacing string
+* @param {boolean} [curlyBraces=true] if you pass a placeholder
+* in error message like this {min} then in replacements you just 
+* need to pass min it would automatically make it {min}
+* if it false then it won't do this. So curlyBraces means true
+* means to add the curly braces around your placeholder like
+* you have an error message like this
+* max : "This field should contain {max} characters."
+* So here max is inside curlybraces {}.
+* to replace this with help of this function 
+* you can easily pass it like this
+* Validator.strReplace(Validator.errorMessages['max'], {max : 90})
+* no need to pass like this {['{max}'] : 90}
+* @returns {string}
+*/
+
+Validator.strReplace("This field should contain {min} characters.",  {min: 8});
+// outputs "This field should contain 8 characters."
+
+```
+
+##### getDate
+
+- If you pass a number like 5 it would give a future date of 5 years form a current date and month and if you pass -5 then it would give a past date.
+
+```javascript
+/**
+ * Resolve howManyYears and give a calculated date 
+ * @param {Number | Date | String | null} howManyYears 
+ * @returns {Date}
+ */
+Validator.getDate(12);
+```
+
 
 ## Customizing Style
 
